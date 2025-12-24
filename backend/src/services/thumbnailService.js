@@ -21,7 +21,11 @@ const getThumbOptions = async () => {
   const quality = Number.isFinite(settings?.thumbnails?.quality)
     ? settings.thumbnails.quality
     : 70;
-  return { size, quality };
+  const showVideoCoverArt =
+    typeof settings?.thumbnails?.showVideoCoverArt === 'boolean'
+      ? settings.thumbnails.showVideoCoverArt
+      : true;
+  return { size, quality, showVideoCoverArt };
 };
 
 const currentConcurrency = sharp.concurrency();
@@ -195,7 +199,7 @@ const makeVideoThumb = async (srcPath, destPath) => {
   }
 
   const getThumbOptionsAsync = await getThumbOptions();
-  const { size, quality } = getThumbOptionsAsync;
+  const { size, quality, showVideoCoverArt } = getThumbOptionsAsync;
 
   // Helper function to attempt extraction with specific FFmpeg options
   const attemptExtraction = async (ffprobeOutput, mapOptions, description) => {
@@ -238,26 +242,28 @@ const makeVideoThumb = async (srcPath, destPath) => {
     }
   };
 
-  // Strategy 1: Look for attached pictures (cover art) in video streams
-  const streams = await probeStreams(srcPath);
-  for (let i = 0; i < streams.length; i++) {
-    const stream = streams[i];
-    if (
-      stream.codec_type === 'video' &&
-      stream.disposition?.attached_pic === 1
-    ) {
-      logger.debug(
-        { srcPath, streamIndex: i },
-        `Found attached picture in stream ${i}`
-      );
+  // Strategy 1: Look for attached pictures (cover art) in video streams (if enabled)
+  if (showVideoCoverArt) {
+    const streams = await probeStreams(srcPath);
+    for (let i = 0; i < streams.length; i++) {
+      const stream = streams[i];
       if (
-        await attemptExtraction(
-          streams,
-          [`-map`, `0:${i}`],
-          `attached picture stream ${i}`
-        )
+        stream.codec_type === 'video' &&
+        stream.disposition?.attached_pic === 1
       ) {
-        return;
+        logger.debug(
+          { srcPath, streamIndex: i },
+          `Found attached picture in stream ${i}`
+        );
+        if (
+          await attemptExtraction(
+            streams,
+            [`-map`, `0:${i}`],
+            `attached picture stream ${i}`
+          )
+        ) {
+          return;
+        }
       }
     }
   }

@@ -11,6 +11,7 @@ const local = reactive({
   quality: 70,
   size: 200,
   concurrency: 10,
+  showVideoCoverArt: true,
 });
 
 const original = computed(() => appSettings.state.thumbnails);
@@ -18,7 +19,8 @@ const dirty = computed(() => (
   local.enabled !== original.value.enabled ||
   local.quality !== original.value.quality ||
   local.size !== original.value.size ||
-  local.concurrency !== original.value.concurrency
+  local.concurrency !== original.value.concurrency ||
+  local.showVideoCoverArt !== original.value.showVideoCoverArt
 ));
 
 watch(
@@ -28,6 +30,7 @@ watch(
     local.quality = t.quality;
     local.size = t.size;
     local.concurrency = t.concurrency ?? 10;
+    local.showVideoCoverArt = t.showVideoCoverArt ?? true;
   },
   { immediate: true },
 );
@@ -38,6 +41,7 @@ const reset = () => {
   local.quality = t.quality;
   local.size = t.size;
   local.concurrency = t.concurrency ?? 10;
+  local.showVideoCoverArt = t.showVideoCoverArt ?? true;
 };
 
 const save = async () => {
@@ -46,7 +50,8 @@ const save = async () => {
       enabled: local.enabled,
       quality: local.quality,
       size: local.size,
-      concurrency: local.concurrency
+      concurrency: local.concurrency,
+      showVideoCoverArt: local.showVideoCoverArt
     }
   });
 };
@@ -107,6 +112,17 @@ const save = async () => {
           <input type="range" min="1" max="50" v-model.number="local.concurrency" class="w-64" />
           <input type="number" min="1" max="50" v-model.number="local.concurrency" class="w-16 rounded-md border border-white/10 bg-transparent px-2 py-1" />
         </div>
+      </div>
+
+      <div class="flex items-center justify-between py-2" :class="{ 'opacity-60 pointer-events-none': !local.enabled }">
+        <div>
+          <div class="font-medium">{{ t('settings.thumbs.showVideoCoverArt') }}</div>
+          <div class="text-sm text-neutral-500 dark:text-neutral-400">{{ t('settings.thumbs.showVideoCoverArtHelp') }}</div>
+        </div>
+        <label class="inline-flex cursor-pointer items-center">
+          <input type="checkbox" v-model="local.showVideoCoverArt" class="peer sr-only" />
+          <div class="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:mt-[2px] after:ml-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all peer-checked:bg-blue-600 peer-checked:after:translate-x-full"></div>
+        </label>
       </div>
     </section>
   </div>
