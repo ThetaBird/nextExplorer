@@ -12,7 +12,9 @@ const createSettingsContext = async () => {
     tag: 'settings-test-',
     modules: SETTINGS_MODULES,
   });
-  const settingsService = envContext.requireFresh('src/services/settingsService');
+  const settingsService = envContext.requireFresh(
+    'src/services/settingsService'
+  );
   return { envContext, settingsService };
 };
 
@@ -25,6 +27,7 @@ test('settingsService returns defaults when no config exists', async () => {
     assert.strictEqual(settings.thumbnails.size, 200);
     assert.strictEqual(settings.thumbnails.quality, 70);
     assert.strictEqual(settings.thumbnails.concurrency, undefined);
+    assert.strictEqual(settings.thumbnails.showVideoCoverArt, true);
   } finally {
     await envContext.cleanup();
   }
@@ -49,6 +52,7 @@ test('setSettings sanitizes thumbnails and filters access rules', async () => {
     assert.strictEqual(updated.thumbnails.quality, 100);
     assert.strictEqual(updated.thumbnails.concurrency, 1);
     assert.strictEqual(updated.thumbnails.enabled, true);
+    assert.strictEqual(updated.thumbnails.showVideoCoverArt, true);
     assert.strictEqual(updated.access.rules.length, 2);
     assert.strictEqual(updated.access.rules[0].path, 'Projects');
     assert.strictEqual(updated.access.rules[1].permissions, 'rw');
