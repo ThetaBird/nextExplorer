@@ -15,8 +15,12 @@ const { getRawPreviewJpegPath } = require('./rawPreviewService');
 
 const getThumbOptions = async () => {
   const settings = await getSettings();
-  const size = Number.isFinite(settings?.thumbnails?.size) ? settings.thumbnails.size : 200;
-  const quality = Number.isFinite(settings?.thumbnails?.quality) ? settings.thumbnails.quality : 70;
+  const size = Number.isFinite(settings?.thumbnails?.size)
+    ? settings.thumbnails.size
+    : 200;
+  const quality = Number.isFinite(settings?.thumbnails?.quality)
+    ? settings.thumbnails.quality
+    : 70;
   return { size, quality };
 };
 
@@ -112,15 +116,18 @@ updateQueueConcurrency();
 
 // Log queue stats periodically for monitoring
 thumbnailQueue.on('active', () => {
-  logger.debug({
-    size: thumbnailQueue.size,
-    pending: thumbnailQueue.pending,
-    concurrency: thumbnailQueue.concurrency,
-  }, 'Thumbnail queue status');
+  logger.debug(
+    {
+      size: thumbnailQueue.size,
+      pending: thumbnailQueue.pending,
+      concurrency: thumbnailQueue.concurrency,
+    },
+    'Thumbnail queue status'
+  );
 });
 
 const hashForFile = async (filePath, stats = null) => {
-  const info = stats || await fsPromises.stat(filePath);
+  const info = stats || (await fsPromises.stat(filePath));
   const hash = crypto.createHash('sha1');
   hash.update(filePath);
   hash.update(String(info.size));
@@ -169,41 +176,124 @@ const probeDuration = (filePath) =>
     });
   });
 
+// Get stream information to identify potential cover art locations
+const probeStreams = (filePath) =>
+  new Promise((resolve) => {
+    ffmpeg.ffprobe(filePath, (error, data) => {
+      if (error || !data?.streams) {
+        resolve([]);
+        return;
+      }
+      resolve(data.streams);
+    });
+  });
+
 const makeVideoThumb = async (srcPath, destPath) => {
   if (!canProcessVideoThumbnails) {
     logger.warn({ srcPath }, 'Skipping video thumbnail (no ffmpeg/ffprobe)');
     return;
   }
 
+  const getThumbOptionsAsync = await getThumbOptions();
+  const { size, quality } = getThumbOptionsAsync;
+
+  // Helper function to attempt extraction with specific FFmpeg options
+  const attemptExtraction = async (ffprobeOutput, mapOptions, description) => {
+    try {
+      await new Promise((resolve, reject) => {
+        const command = ffmpeg(srcPath)
+          .inputOptions(['-hide_banner', '-loglevel', 'error'])
+          .outputOptions(['-frames:v', '1', '-c:v', 'png', ...mapOptions])
+          .format('image2pipe')
+          .on('error', reject);
+
+        const stream = command.pipe();
+        stream.on('error', reject);
+
+        const pipeline = sharp()
+          .resize({
+            width: size,
+            height: size,
+            fit: 'inside',
+            withoutEnlargement: true,
+            fastShrinkOnLoad: true,
+          })
+          .webp({ quality, effort: 4 });
+
+        stream.pipe(pipeline);
+        pipeline
+          .toBuffer()
+          .then((buffer) => atomicWrite(destPath, buffer))
+          .then(resolve)
+          .catch(reject);
+      });
+      logger.debug({ srcPath }, `Generated thumbnail from ${description}`);
+      return true;
+    } catch (error) {
+      logger.debug(
+        { srcPath, err: error.message },
+        `Failed to extract from ${description}`
+      );
+      return false;
+    }
+  };
+
+  // Strategy 1: Look for attached pictures (cover art) in video streams
+  const streams = await probeStreams(srcPath);
+  for (let i = 0; i < streams.length; i++) {
+    const stream = streams[i];
+    if (
+      stream.codec_type === 'video' &&
+      stream.disposition?.attached_pic === 1
+    ) {
+      logger.debug(
+        { srcPath, streamIndex: i },
+        `Found attached picture in stream ${i}`
+      );
+      if (
+        await attemptExtraction(
+          streams,
+          [`-map`, `0:${i}`],
+          `attached picture stream ${i}`
+        )
+      ) {
+        return;
+      }
+    }
+  }
+
+  // Strategy 2: Extract frame at 5% of video duration
   const duration = await probeDuration(srcPath);
-  const seconds = duration && Number.isFinite(duration)
-    ? Math.max(1, Math.floor(duration * 0.05))
-    : 1;
+  const seconds =
+    duration && Number.isFinite(duration)
+      ? Math.max(1, Math.floor(duration * 0.05))
+      : 1;
 
   await new Promise((resolve, reject) => {
-    // Size is dynamic; capture inside ffmpeg filter
-    let size = 200;
-    getThumbOptions().then(({ size: sz }) => { size = sz; }).catch(() => {});
     const command = ffmpeg(srcPath)
       .inputOptions(['-hide_banner', '-loglevel', 'error'])
       .seekInput(seconds)
-      .outputOptions(['-frames:v', '1', '-vf', `scale=${size}:-1:flags=lanczos`, '-vcodec', 'png'])
+      .outputOptions([
+        '-frames:v',
+        '1',
+        '-vf',
+        `scale=${size}:-1:flags=lanczos`,
+        '-vcodec',
+        'png',
+      ])
       .format('image2pipe')
       .on('error', reject);
 
     const stream = command.pipe();
     stream.on('error', reject);
 
-    (async () => {
-      const { quality } = await getThumbOptions();
-      const pipeline = sharp().webp({ quality, effort: 4 });
-      stream.pipe(pipeline);
-      pipeline
-        .toBuffer()
-        .then((buffer) => atomicWrite(destPath, buffer))
-        .then(resolve)
-        .catch(reject);
-    })().catch(reject);
+    const pipeline = sharp().webp({ quality, effort: 4 });
+    stream.pipe(pipeline);
+    pipeline
+      .toBuffer()
+      .then((buffer) => atomicWrite(destPath, buffer))
+      .then(resolve)
+      .catch(reject);
   });
 };
 
@@ -215,9 +305,11 @@ const makeHeicThumb = async (srcPath, destPath) => {
     const convert = spawn('convert', [
       srcPath,
       '-auto-orient',
-      '-resize', `${size}x`,
-      '-quality', '100',
-      'png:-'
+      '-resize',
+      `${size}x`,
+      '-quality',
+      '100',
+      'png:-',
     ]);
 
     let stderr = '';
@@ -231,7 +323,9 @@ const makeHeicThumb = async (srcPath, destPath) => {
 
     convert.on('exit', (code) => {
       if (code !== 0 && code !== null) {
-        reject(new Error(`ImageMagick convert exited with code ${code}: ${stderr}`));
+        reject(
+          new Error(`ImageMagick convert exited with code ${code}: ${stderr}`)
+        );
       }
     });
 
@@ -330,36 +424,44 @@ const getThumbnail = async (filePath) => {
   let pending = inflight.get(thumbPath);
   if (!pending) {
     // Queue the thumbnail generation with concurrency limit
-    pending = thumbnailQueue.add(async () => {
-      try {
-        // Double-check if another request created it while we were queued
+    pending = thumbnailQueue
+      .add(async () => {
         try {
-          await fsPromises.access(thumbPath, fs.constants.F_OK);
-          return `/static/thumbnails/${thumbFile}`;
+          // Double-check if another request created it while we were queued
+          try {
+            await fsPromises.access(thumbPath, fs.constants.F_OK);
+            return `/static/thumbnails/${thumbFile}`;
+          } catch (error) {
+            // Still doesn't exist, generate it
+          }
+
+          logger.debug({ filePath, thumbPath }, 'Generating thumbnail');
+          await generateThumbnail(filePath, thumbPath);
+
+          // Verify generation succeeded
+          try {
+            await fsPromises.access(thumbPath, fs.constants.F_OK);
+            logger.debug(
+              { filePath, thumbPath },
+              'Thumbnail generated successfully'
+            );
+            return `/static/thumbnails/${thumbFile}`;
+          } catch (missing) {
+            logger.warn(
+              { filePath, thumbPath },
+              'Thumbnail generation completed but file not found'
+            );
+            return '';
+          }
         } catch (error) {
-          // Still doesn't exist, generate it
+          logger.error({ filePath, err: error }, 'Thumbnail generation failed');
+          throw error;
         }
-
-        logger.debug({ filePath, thumbPath }, 'Generating thumbnail');
-        await generateThumbnail(filePath, thumbPath);
-
-        // Verify generation succeeded
-        try {
-          await fsPromises.access(thumbPath, fs.constants.F_OK);
-          logger.debug({ filePath, thumbPath }, 'Thumbnail generated successfully');
-          return `/static/thumbnails/${thumbFile}`;
-        } catch (missing) {
-          logger.warn({ filePath, thumbPath }, 'Thumbnail generation completed but file not found');
-          return '';
-        }
-      } catch (error) {
-        logger.error({ filePath, err: error }, 'Thumbnail generation failed');
-        throw error;
-      }
-    }).finally(() => {
-      // Clean up inflight map when done
-      inflight.delete(thumbPath);
-    });
+      })
+      .finally(() => {
+        // Clean up inflight map when done
+        inflight.delete(thumbPath);
+      });
 
     inflight.set(thumbPath, pending);
   }

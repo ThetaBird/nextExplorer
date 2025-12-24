@@ -105,6 +105,7 @@ dist
 # vuepress v2.x temp and cache directory
 .temp
 .cache
+.config
 
 # VitePress build and cache
 docs/.vitepress/cache
@@ -134,3 +135,6 @@ docs/.vitepress/dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+.DS_Store
+docker-compose.local.yml
