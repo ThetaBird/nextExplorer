@@ -130,12 +130,31 @@ thumbnailQueue.on('active', () => {
   );
 });
 
-const hashForFile = async (filePath, stats = null) => {
+const getVideoCacheSettings = async () => {
+  const settings = await getSettings();
+  return {
+    showVideoCoverArt: typeof settings?.thumbnails?.showVideoCoverArt === 'boolean'
+      ? settings.thumbnails.showVideoCoverArt
+      : true,
+  };
+};
+
+const hashForFile = async (filePath, stats = null, includeVideoSettings = false) => {
   const info = stats || (await fsPromises.stat(filePath));
   const hash = crypto.createHash('sha1');
   hash.update(filePath);
   hash.update(String(info.size));
   hash.update(String(Math.floor(info.mtimeMs)));
+  
+  // Include video thumbnail settings if requested
+  if (includeVideoSettings) {
+    const extension = path.extname(filePath).toLowerCase().slice(1);
+    if (isVideo(extension)) {
+      const videoSettings = await getVideoCacheSettings();
+      hash.update(JSON.stringify(videoSettings));
+    }
+  }
+  
   return hash.digest('hex');
 };
 
@@ -377,7 +396,9 @@ const generateThumbnail = async (filePath, thumbPath) => {
 };
 
 const buildThumbnailPaths = async (filePath, stats = null) => {
-  const key = await hashForFile(filePath, stats);
+  const extension = path.extname(filePath).toLowerCase().slice(1);
+  const includeVideoSettings = isVideo(extension);
+  const key = await hashForFile(filePath, stats, includeVideoSettings);
   const thumbFile = `v${THUMBNAIL_CACHE_VERSION}-${key}.webp`;
   const thumbPath = path.join(directories.thumbnails, thumbFile);
   return { thumbFile, thumbPath };

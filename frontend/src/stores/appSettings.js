@@ -26,11 +26,11 @@ export const useAppSettings = defineStore('appSettings', () => {
       const s = await getSettingsApi();
       state.value = {
         thumbnails: {
-          enabled: true,
-          size: 200,
-          quality: 70,
-          showVideoCoverArt: true,
-          ...(s?.thumbnails || {}),
+          enabled: s?.thumbnails?.enabled ?? true,
+          size: s?.thumbnails?.size ?? 200,
+          quality: s?.thumbnails?.quality ?? 70,
+          showVideoCoverArt: s?.thumbnails?.showVideoCoverArt,
+          concurrency: s?.thumbnails?.concurrency ?? 10,
         },
         access: {
           rules: Array.isArray(s?.access?.rules) ? s.access.rules : [],
@@ -49,11 +49,11 @@ export const useAppSettings = defineStore('appSettings', () => {
     const updated = await patchSettingsApi(partial);
     state.value = {
       thumbnails: {
-        enabled: true,
-        size: 200,
-        quality: 70,
-        showVideoCoverArt: true,
-        ...(updated?.thumbnails || {}),
+        enabled: updated?.thumbnails?.enabled ?? true,
+        size: updated?.thumbnails?.size ?? 200,
+        quality: updated?.thumbnails?.quality ?? 70,
+        showVideoCoverArt: updated?.thumbnails?.showVideoCoverArt,
+        concurrency: updated?.thumbnails?.concurrency ?? 10,
       },
       access: {
         rules: Array.isArray(updated?.access?.rules)
