@@ -15,8 +15,8 @@ export function useSelection() {
     return fileStore.getCurrentPathItems.find((candidate) => getItemKey(candidate) === key) || item;
   };
 
-  const isSelected = (item) => fileStore.selectedItems
-    .some((selected) => getItemKey(selected) === getItemKey(item));
+  const isSelected = (item) =>
+    fileStore.selectedItems.some((selected) => getItemKey(selected) === getItemKey(item));
 
   const toggleSelection = (item) => {
     const key = getItemKey(item);

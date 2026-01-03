@@ -3,7 +3,10 @@ const { getDb } = require('./db');
 
 const nowIso = () => new Date().toISOString();
 
-const generateId = () => (typeof crypto.randomUUID === 'function' ? crypto.randomUUID() : `${Date.now().toString(36)}-${crypto.randomBytes(8).toString('hex')}`);
+const generateId = () =>
+  typeof crypto.randomUUID === 'function'
+    ? crypto.randomUUID()
+    : `${Date.now().toString(36)}-${crypto.randomBytes(8).toString('hex')}`;
 
 // Default session duration: 24 hours
 const DEFAULT_SESSION_HOURS = 24;
@@ -44,11 +47,13 @@ const createGuestSession = async ({
   const now = nowIso();
   const expiresAt = new Date(Date.now() + durationHours * 60 * 60 * 1000).toISOString();
 
-  db.prepare(`
+  db.prepare(
+    `
     INSERT INTO guest_sessions (
       id, share_id, ip_address, user_agent, created_at, expires_at, last_activity_at
     ) VALUES (?, ?, ?, ?, ?, ?, ?)
-  `).run(sessionId, shareId, ipAddress, userAgent, now, expiresAt, now);
+  `
+  ).run(sessionId, shareId, ipAddress, userAgent, now, expiresAt, now);
 
   return getGuestSession(sessionId);
 };
@@ -67,11 +72,15 @@ const getGuestSession = async (sessionId) => {
  */
 const getGuestSessionsByShareId = async (shareId) => {
   const db = await getDb();
-  const rows = db.prepare(`
+  const rows = db
+    .prepare(
+      `
     SELECT * FROM guest_sessions
     WHERE share_id = ?
     ORDER BY created_at DESC
-  `).all(shareId);
+  `
+    )
+    .all(shareId);
 
   return rows.map(toClientSession);
 };
@@ -97,11 +106,15 @@ const isGuestSessionValid = async (sessionId) => {
  */
 const updateGuestSessionActivity = async (sessionId) => {
   const db = await getDb();
-  const result = db.prepare(`
+  const result = db
+    .prepare(
+      `
     UPDATE guest_sessions
     SET last_activity_at = ?
     WHERE id = ?
-  `).run(nowIso(), sessionId);
+  `
+    )
+    .run(nowIso(), sessionId);
 
   return result.changes > 0;
 };
@@ -129,9 +142,13 @@ const deleteGuestSessionsByShareId = async (shareId) => {
  */
 const cleanupExpiredSessions = async () => {
   const db = await getDb();
-  const result = db.prepare(`
+  const result = db
+    .prepare(
+      `
     DELETE FROM guest_sessions WHERE expires_at < ?
-  `).run(nowIso());
+  `
+    )
+    .run(nowIso());
 
   return result.changes;
 };
@@ -141,11 +158,15 @@ const cleanupExpiredSessions = async () => {
  */
 const getActiveSessionCount = async (shareId) => {
   const db = await getDb();
-  const row = db.prepare(`
+  const row = db
+    .prepare(
+      `
     SELECT COUNT(*) as count
     FROM guest_sessions
     WHERE share_id = ? AND expires_at > ?
-  `).get(shareId, nowIso());
+  `
+    )
+    .get(shareId, nowIso());
 
   return row?.count || 0;
 };
@@ -166,11 +187,13 @@ const extendGuestSession = async (sessionId, additionalHours = DEFAULT_SESSION_H
   const newExpiry = new Date(currentExpiry.getTime() + additionalHours * 60 * 60 * 1000);
 
   const db = await getDb();
-  db.prepare(`
+  db.prepare(
+    `
     UPDATE guest_sessions
     SET expires_at = ?, last_activity_at = ?
     WHERE id = ?
-  `).run(newExpiry.toISOString(), nowIso(), sessionId);
+  `
+  ).run(newExpiry.toISOString(), nowIso(), sessionId);
 
   return getGuestSession(sessionId);
 };

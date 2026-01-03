@@ -9,16 +9,14 @@ const { parseByteSize } = require('../utils/env');
 const parseScopes = (raw) => {
   if (!raw) return null;
   const parts = raw.includes(',') ? raw.split(',') : raw.split(/\s+/);
-  return parts.map(s => s.trim()).filter(Boolean);
+  return parts.map((s) => s.trim()).filter(Boolean);
 };
 
 // --- Paths ---
 const volumeDir = path.resolve(env.VOLUME_ROOT);
 const configDir = path.resolve(env.CONFIG_DIR);
 const cacheDir = path.resolve(env.CACHE_DIR);
-const userRootDir = env.USER_ROOT
-  ? path.resolve(env.USER_ROOT)
-  : path.join(volumeDir, '_users');
+const userRootDir = env.USER_ROOT ? path.resolve(env.USER_ROOT) : path.join(volumeDir, '_users');
 
 const directories = {
   volume: volumeDir,
@@ -48,7 +46,12 @@ if (env.PUBLIC_URL) {
 const buildCorsConfig = () => {
   if (env.CORS_ORIGINS) {
     if (env.CORS_ORIGINS === '*') return { allowAll: true, origins: [] };
-    return { allowAll: false, origins: env.CORS_ORIGINS.split(',').map(o => o.trim()).filter(Boolean) };
+    return {
+      allowAll: false,
+      origins: env.CORS_ORIGINS.split(',')
+        .map((o) => o.trim())
+        .filter(Boolean),
+    };
   }
   if (publicOrigin) return { allowAll: false, origins: [publicOrigin] };
   return { allowAll: true, origins: [] }; // Backwards compatibility
@@ -86,7 +89,7 @@ const determineAuthMode = () => {
 const authMode = determineAuthMode();
 
 const auth = {
-  enabled: authMode === 'disabled' ? false : (env.AUTH_ENABLED !== false),
+  enabled: authMode === 'disabled' ? false : env.AUTH_ENABLED !== false,
   sessionSecret: env.SESSION_SECRET || crypto.randomBytes(32).toString('hex'),
   mode: authMode,
   oidc: {
@@ -117,7 +120,9 @@ const onlyoffice = {
   secret: env.ONLYOFFICE_SECRET || env.SESSION_SECRET || auth.sessionSecret,
   lang: env.ONLYOFFICE_LANG,
   forceSave: env.ONLYOFFICE_FORCE_SAVE,
-  extensions: env.ONLYOFFICE_FILE_EXTENSIONS.split(',').map(s => s.trim().toLowerCase()).filter(Boolean),
+  extensions: env.ONLYOFFICE_FILE_EXTENSIONS.split(',')
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean),
 };
 
 // --- Editor ---
@@ -128,7 +133,9 @@ const editorMaxFileSizeBytes = (() => {
 })();
 
 const editor = {
-  extensions: env.EDITOR_EXTENSIONS.split(',').map(s => s.trim().toLowerCase()).filter(Boolean),
+  extensions: env.EDITOR_EXTENSIONS.split(',')
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean),
   maxFileSizeBytes: editorMaxFileSizeBytes,
 };
 
@@ -152,13 +159,13 @@ const shares = {
 module.exports = {
   port: env.PORT,
   directories,
-  
+
   files: {
     passwordConfig: path.join(configDir, 'app-config.json'),
   },
-  
+
   public: { url: publicUrl, origin: publicOrigin },
-  
+
   extensions: {
     images: constants.IMAGE_EXTENSIONS,
     rawImages: constants.RAW_IMAGE_EXTENSIONS,
@@ -167,20 +174,20 @@ module.exports = {
     documents: constants.DOCUMENT_EXTENSIONS,
     previewable: constants.PREVIEWABLE_EXTENSIONS,
   },
-  
+
   excludedFiles: constants.EXCLUDED_FILES,
   mimeTypes: constants.MIME_TYPES,
   corsOptions,
-  
+
   auth,
-  
+
   search: {
     deep: env.SEARCH_DEEP ?? true,
     ripgrep: env.SEARCH_RIPGREP ?? true,
     maxFileSize: env.SEARCH_MAX_FILESIZE,
     maxFileSizeBytes: searchMaxFileSizeBytes,
   },
-  
+
   thumbnails: { size: 200, quality: 70 },
   onlyoffice,
   editor,
@@ -194,7 +201,7 @@ module.exports = {
     shares: env.SHARES_ENABLED,
     skipHome: env.SKIP_HOME,
   },
-  
+
   logging: {
     level: loggingConfig.level,
     isDebug: loggingConfig.isDebug,

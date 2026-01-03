@@ -54,8 +54,12 @@ test('create local user, login, change password, and enforce lockout', async () 
 
     // Next attempt should throw 423 lockout
     await assert.rejects(
-      () => users.attemptLocalLogin({ email: 'admin@example.com', password: 'nope' }),
-      (err) => err && err.status === 423,
+      () =>
+        users.attemptLocalLogin({
+          email: 'admin@example.com',
+          password: 'nope',
+        }),
+      (err) => err && err.status === 423
     );
   } finally {
     await envContext.cleanup();
@@ -72,17 +76,18 @@ test('OIDC: deny login when auto-create disabled and user missing', async () => 
 
   try {
     await assert.rejects(
-      () => users.getOrCreateOidcUser({
-        issuer: 'https://issuer.example.com',
-        sub: 'sub-1',
-        email: 'missing@example.com',
-        emailVerified: true,
-        username: 'missing',
-        displayName: 'Missing',
-        roles: ['user'],
-        autoCreateUsers: false,
-      }),
-      (err) => err && err.statusCode === 403,
+      () =>
+        users.getOrCreateOidcUser({
+          issuer: 'https://issuer.example.com',
+          sub: 'sub-1',
+          email: 'missing@example.com',
+          emailVerified: true,
+          username: 'missing',
+          displayName: 'Missing',
+          roles: ['user'],
+          autoCreateUsers: false,
+        }),
+      (err) => err && err.statusCode === 403
     );
   } finally {
     await envContext.cleanup();

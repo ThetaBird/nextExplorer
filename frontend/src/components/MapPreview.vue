@@ -10,7 +10,9 @@ const props = defineProps({
 });
 
 // Google Maps embed (no API key needed for simple embed)
-const googleSrc = computed(() => `https://www.google.com/maps?q=${props.lat},${props.lon}&z=${props.zoom}&output=embed`);
+const googleSrc = computed(
+  () => `https://www.google.com/maps?q=${props.lat},${props.lon}&z=${props.zoom}&output=embed`
+);
 
 // OpenStreetMap embed (no external libs)
 const osmSrc = computed(() => {
@@ -29,7 +31,7 @@ const frameStyle = computed(() => ({ height: `${props.height}px` }));
     <iframe
       :src="src"
       class="w-full"
-      style="border:0;"
+      style="border: 0"
       :style="frameStyle"
       loading="lazy"
       referrerpolicy="no-referrer-when-downgrade"
@@ -44,4 +46,3 @@ const frameStyle = computed(() => ({ height: `${props.height}px` }));
 <style scoped>
 /* iframe naturally fills provided height */
 </style>
-

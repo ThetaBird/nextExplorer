@@ -3,12 +3,7 @@ import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
-import {
-  getShareInfo,
-  verifySharePassword,
-  accessShare,
-  setGuestSession,
-} from '@/api/shares.api';
+import { getShareInfo, verifySharePassword, accessShare, setGuestSession } from '@/api/shares.api';
 import {
   ShareIcon,
   LockClosedIcon,
@@ -36,7 +31,9 @@ const verificationError = ref('');
 
 // Computed
 const isExpired = computed(() => shareInfo.value?.isExpired || false);
-const requiresPassword = computed(() => Boolean(shareInfo.value?.hasPassword && shareInfo.value?.sharingType === 'anyone'));
+const requiresPassword = computed(() =>
+  Boolean(shareInfo.value?.hasPassword && shareInfo.value?.sharingType === 'anyone')
+);
 const expiryDate = computed(() => {
   if (!shareInfo.value?.expiresAt) return null;
   return new Date(shareInfo.value.expiresAt);
@@ -214,7 +211,9 @@ async function handlePasswordSubmit() {
       <div v-else class="p-8 bg-white rounded-lg shadow-lg dark:bg-zinc-800">
         <!-- Header -->
         <div class="mb-6 text-center">
-          <div class="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-blue-100 rounded-full dark:bg-blue-900">
+          <div
+            class="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-blue-100 rounded-full dark:bg-blue-900"
+          >
             <ShareIcon class="w-8 h-8 text-blue-600 dark:text-blue-400" />
           </div>
           <h2 class="mb-2 text-2xl font-bold text-gray-900 dark:text-gray-100">
@@ -240,7 +239,9 @@ async function handlePasswordSubmit() {
           <div v-if="shareInfo.expiresAt" class="flex items-center gap-3 text-sm">
             <ClockIcon class="w-5 h-5 text-gray-500 dark:text-gray-400" />
             <span class="text-gray-600 dark:text-gray-300">
-              {{ t('share.expiresAt') }} {{ expiryDate.toLocaleDateString() }} at {{ expiryDate.toLocaleTimeString() }}
+              {{ t('share.expiresAt') }}
+              {{ expiryDate.toLocaleDateString() }} at
+              {{ expiryDate.toLocaleTimeString() }}
             </span>
           </div>
 
@@ -267,7 +268,10 @@ async function handlePasswordSubmit() {
             />
           </div>
 
-          <div v-if="verificationError" class="p-3 text-sm text-red-700 rounded-lg bg-red-50 dark:bg-red-900/20 dark:text-red-200">
+          <div
+            v-if="verificationError"
+            class="p-3 text-sm text-red-700 rounded-lg bg-red-50 dark:bg-red-900/20 dark:text-red-200"
+          >
             {{ verificationError }}
           </div>
 
@@ -294,7 +298,12 @@ async function handlePasswordSubmit() {
           </button>
           <button
             v-else
-            @click="router.push({ name: 'auth-login', query: { redirect: `/share/${shareToken}` } })"
+            @click="
+              router.push({
+                name: 'auth-login',
+                query: { redirect: `/share/${shareToken}` },
+              })
+            "
             class="w-full px-6 py-3 font-medium text-white transition bg-blue-600 rounded-lg hover:bg-blue-700"
           >
             {{ t('share.signInToAccess') }}

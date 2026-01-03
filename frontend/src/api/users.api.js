@@ -27,7 +27,13 @@ export async function updateUser(userId, data) {
 export async function createUser({ email, username, password, displayName, roles = [] }) {
   return requestJson('/api/users', {
     method: 'POST',
-    body: JSON.stringify({ email, username, password, displayName, roles: Array.isArray(roles) ? roles : [] }),
+    body: JSON.stringify({
+      email,
+      username,
+      password,
+      displayName,
+      roles: Array.isArray(roles) ? roles : [],
+    }),
   });
 }
 
@@ -60,16 +66,22 @@ export async function addUserVolume(userId, { label, path, accessMode = 'readwri
 }
 
 export async function updateUserVolume(userId, volumeId, { label, accessMode }) {
-  return requestJson(`/api/users/${encodeURIComponent(userId)}/volumes/${encodeURIComponent(volumeId)}`, {
-    method: 'PATCH',
-    body: JSON.stringify({ label, accessMode }),
-  });
+  return requestJson(
+    `/api/users/${encodeURIComponent(userId)}/volumes/${encodeURIComponent(volumeId)}`,
+    {
+      method: 'PATCH',
+      body: JSON.stringify({ label, accessMode }),
+    }
+  );
 }
 
 export async function removeUserVolume(userId, volumeId) {
-  return requestJson(`/api/users/${encodeURIComponent(userId)}/volumes/${encodeURIComponent(volumeId)}`, {
-    method: 'DELETE',
-  });
+  return requestJson(
+    `/api/users/${encodeURIComponent(userId)}/volumes/${encodeURIComponent(volumeId)}`,
+    {
+      method: 'DELETE',
+    }
+  );
 }
 
 export async function browseAdminDirectories(dirPath = '') {

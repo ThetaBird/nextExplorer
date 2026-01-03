@@ -2,19 +2,15 @@
   <teleport to="body">
     <!-- Standalone plugins render directly -->
     <div v-if="isStandalone">
-      <component
-        v-if="component"
-        :is="component"
-        v-bind="activeItem"
-      />
+      <component v-if="component" :is="component" v-bind="activeItem" />
       <!-- Lightweight fallback while standalone plugin component loads -->
       <div
         v-else
         class="fixed inset-0 z-2000 flex items-center justify-center text-sm text-neutral-200"
       >
-        <div class="flex  items-center pr-4 bg-neutral-300 dark:bg-black bg-opacity-20 rounded-lg">
-        <LoadingIcon/> {{ $t('common.loading') }}
-      </div>
+        <div class="flex items-center pr-4 bg-neutral-300 dark:bg-black bg-opacity-20 rounded-lg">
+          <LoadingIcon /> {{ $t('common.loading') }}
+        </div>
       </div>
     </div>
 
@@ -26,8 +22,9 @@
         @click.self="handleClose"
         @keydown.esc="handleClose"
       >
-        <div class="relative flex h-screen w-screen flex-col overflow-hidden rounded-lg bg-white shadow-2xl dark:bg-zinc-900">
-          
+        <div
+          class="relative flex h-screen w-screen flex-col overflow-hidden rounded-lg bg-white shadow-2xl dark:bg-zinc-900"
+        >
           <!-- Header (unless minimal) -->
           <header
             v-if="!isMinimal"
@@ -49,9 +46,10 @@
                 :key="action.id"
                 type="button"
                 class="inline-flex items-center gap-2 rounded-md px-2 py-1 text-sm font-medium transition"
-                :class="action.variant === 'primary'
-                  ? 'bg-blue-600 text-white hover:bg-blue-500'
-                  : 'border border-neutral-300 text-neutral-700 hover:bg-neutral-100 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-700'
+                :class="
+                  action.variant === 'primary'
+                    ? 'bg-blue-600 text-white hover:bg-blue-500'
+                    : 'border border-neutral-300 text-neutral-700 hover:bg-neutral-100 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-700'
                 "
                 @click="runAction(action)"
               >
@@ -85,13 +83,11 @@
               <XMarkIcon class="h-5 w-5" />
             </button>
 
-            <component
-              v-if="component"
-              :is="component"
-              v-bind="activeItem"
-              class="h-full"
-            />
-            <div v-else class="flex h-full items-center justify-center text-sm text-neutral-500 dark:text-neutral-400">
+            <component v-if="component" :is="component" v-bind="activeItem" class="h-full" />
+            <div
+              v-else
+              class="flex h-full items-center justify-center text-sm text-neutral-500 dark:text-neutral-400"
+            >
               Loading preview…
             </div>
           </main>
@@ -104,7 +100,12 @@
 <script setup>
 import { computed, shallowRef, watch } from 'vue';
 import { storeToRefs } from 'pinia';
-import { XMarkIcon, ArrowDownTrayIcon, PencilSquareIcon, ArrowTopRightOnSquareIcon } from '@heroicons/vue/24/outline';
+import {
+  XMarkIcon,
+  ArrowDownTrayIcon,
+  PencilSquareIcon,
+  ArrowTopRightOnSquareIcon,
+} from '@heroicons/vue/24/outline';
 import { usePreviewManager } from '@/plugins/preview/manager';
 import LoadingIcon from '@/icons/LoadingIcon.vue';
 
@@ -119,7 +120,7 @@ const actions = computed(() => {
   if (!activePlugin.value || !activeItem.value || isStandalone.value || isMinimal.value) {
     return [];
   }
-  
+
   const pluginActions = activePlugin.value.actions?.(activeItem.value);
   return Array.isArray(pluginActions) ? pluginActions : [];
 });
@@ -127,18 +128,22 @@ const actions = computed(() => {
 // Component loading
 const component = shallowRef(null);
 
-watch(activePlugin, async (plugin) => {
-  component.value = null;
-  if (!plugin) return;
+watch(
+  activePlugin,
+  async (plugin) => {
+    component.value = null;
+    if (!plugin) return;
 
-  try {
-    const factory = plugin.component;
-    const result = typeof factory === 'function' ? await factory() : factory;
-    component.value = result?.default || result;
-  } catch (error) {
-    console.error(`Failed to load plugin ${plugin.id}:`, error);
-  }
-}, { immediate: true });
+    try {
+      const factory = plugin.component;
+      const result = typeof factory === 'function' ? await factory() : factory;
+      component.value = result?.default || result;
+    } catch (error) {
+      console.error(`Failed to load plugin ${plugin.id}:`, error);
+    }
+  },
+  { immediate: true }
+);
 
 // Handlers
 const handleClose = () => {
@@ -149,7 +154,7 @@ const handleClose = () => {
 
 const runAction = (action) => {
   if (!action?.run || !activeItem.value) return;
-  
+
   try {
     action.run(activeItem.value);
   } catch (error) {

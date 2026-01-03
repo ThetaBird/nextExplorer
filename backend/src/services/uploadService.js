@@ -47,14 +47,19 @@ function CustomStorage() {
 CustomStorage.prototype._handleFile = function handleFile(req, file, cb) {
   (async () => {
     try {
-      const { destinationPath, destinationDir, logicalRelativePath } = await resolveUploadPaths(req, file);
+      const { destinationPath, destinationDir, logicalRelativePath } = await resolveUploadPaths(
+        req,
+        file
+      );
 
       // Enforce access control: destination directory must be writable
       const relDestDir = normalizeRelativePath(path.dirname(logicalRelativePath));
 
       // Prevent uploading directly to the root path (no space / volume selected)
       if (!relDestDir || relDestDir.trim() === '') {
-        throw new Error('Cannot upload files to the root path. Please select a specific volume or folder first.');
+        throw new Error(
+          'Cannot upload files to the root path. Please select a specific volume or folder first.'
+        );
       }
 
       await ensureDir(destinationDir);

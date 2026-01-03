@@ -67,5 +67,8 @@ test('resolveItemPaths returns normalized relative and absolute paths', async ()
   const item = { name: 'file.txt', path: 'docs/reports' };
   const resolved = await pathUtils.resolveItemPaths(item);
   assert.strictEqual(resolved.relativePath, 'docs/reports/file.txt');
-  assert.strictEqual(resolved.absolutePath, path.resolve(envContext.volumeDir, 'docs/reports/file.txt'));
+  assert.strictEqual(
+    resolved.absolutePath,
+    path.resolve(envContext.volumeDir, 'docs/reports/file.txt')
+  );
 });

@@ -4,7 +4,10 @@ const { getDb } = require('./db');
 
 const nowIso = () => new Date().toISOString();
 
-const generateId = () => (typeof crypto.randomUUID === 'function' ? crypto.randomUUID() : `${Date.now().toString(36)}-${crypto.randomBytes(8).toString('hex')}`);
+const generateId = () =>
+  typeof crypto.randomUUID === 'function'
+    ? crypto.randomUUID()
+    : `${Date.now().toString(36)}-${crypto.randomBytes(8).toString('hex')}`;
 
 /**
  * Generate a URL-safe share token
@@ -102,13 +105,15 @@ const createShare = async ({
   const passwordHash = password ? bcrypt.hashSync(password, 10) : null;
 
   // Create share
-  db.prepare(`
+  db.prepare(
+    `
     INSERT INTO shares (
       id, share_token, owner_id, source_space, source_path, is_directory,
       access_mode, sharing_type, password_hash, expires_at, label,
       download_count, created_at, updated_at
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?)
-  `).run(
+  `
+  ).run(
     shareId,
     shareToken,
     ownerId,
@@ -158,10 +163,14 @@ const getShareById = async (shareId) => {
 
   // Add permitted users if user-specific share
   if (share.sharingType === 'users') {
-    const permissions = db.prepare(`
+    const permissions = db
+      .prepare(
+        `
       SELECT user_id FROM share_permissions WHERE share_id = ?
-    `).all(shareId);
-    share.permittedUserIds = permissions.map(p => p.user_id);
+    `
+      )
+      .all(shareId);
+    share.permittedUserIds = permissions.map((p) => p.user_id);
   }
 
   return share;
@@ -179,10 +188,14 @@ const getShareByToken = async (token) => {
 
   // Add permitted users if user-specific share
   if (share.sharingType === 'users') {
-    const permissions = db.prepare(`
+    const permissions = db
+      .prepare(
+        `
       SELECT user_id FROM share_permissions WHERE share_id = ?
-    `).all(share.id);
-    share.permittedUserIds = permissions.map(p => p.user_id);
+    `
+      )
+      .all(share.id);
+    share.permittedUserIds = permissions.map((p) => p.user_id);
   }
 
   return share;
@@ -193,19 +206,27 @@ const getShareByToken = async (token) => {
  */
 const getSharesByOwnerId = async (ownerId) => {
   const db = await getDb();
-  const rows = db.prepare(`
+  const rows = db
+    .prepare(
+      `
     SELECT * FROM shares WHERE owner_id = ? ORDER BY created_at DESC
-  `).all(ownerId);
+  `
+    )
+    .all(ownerId);
 
-  return rows.map(row => {
+  return rows.map((row) => {
     const share = toClientShare(row);
 
     // Add permitted users if user-specific share
     if (share.sharingType === 'users') {
-      const permissions = db.prepare(`
+      const permissions = db
+        .prepare(
+          `
         SELECT user_id FROM share_permissions WHERE share_id = ?
-      `).all(share.id);
-      share.permittedUserIds = permissions.map(p => p.user_id);
+      `
+        )
+        .all(share.id);
+      share.permittedUserIds = permissions.map((p) => p.user_id);
     }
 
     return share;
@@ -217,12 +238,16 @@ const getSharesByOwnerId = async (ownerId) => {
  */
 const getSharesForUser = async (userId) => {
   const db = await getDb();
-  const rows = db.prepare(`
+  const rows = db
+    .prepare(
+      `
     SELECT s.* FROM shares s
     INNER JOIN share_permissions sp ON s.id = sp.share_id
     WHERE sp.user_id = ?
     ORDER BY s.created_at DESC
-  `).all(userId);
+  `
+    )
+    .all(userId);
 
   // For recipients, do not expose the original source path or space.
   // Instead, expose a derived sourceName (leaf folder/file name) for display.
@@ -257,12 +282,18 @@ const updateShare = async (shareId, updates = {}) => {
   const fields = [];
   const values = [];
 
-  if (typeof updates.accessMode === 'string' && ['readonly', 'readwrite'].includes(updates.accessMode)) {
+  if (
+    typeof updates.accessMode === 'string' &&
+    ['readonly', 'readwrite'].includes(updates.accessMode)
+  ) {
     fields.push('access_mode = ?');
     values.push(updates.accessMode);
   }
 
-  if (typeof updates.sharingType === 'string' && ['anyone', 'users'].includes(updates.sharingType)) {
+  if (
+    typeof updates.sharingType === 'string' &&
+    ['anyone', 'users'].includes(updates.sharingType)
+  ) {
     fields.push('sharing_type = ?');
     values.push(updates.sharingType);
   }
@@ -377,9 +408,13 @@ const hasUserPermission = async (shareId, userId) => {
   }
 
   // Check user-specific permission
-  const perm = db.prepare(`
+  const perm = db
+    .prepare(
+      `
     SELECT id FROM share_permissions WHERE share_id = ? AND user_id = ?
-  `).get(shareId, userId);
+  `
+    )
+    .get(shareId, userId);
 
   return Boolean(perm);
 };
@@ -405,11 +440,13 @@ const isShareExpired = (share) => {
  */
 const trackShareAccess = async (shareId) => {
   const db = await getDb();
-  db.prepare(`
+  db.prepare(
+    `
     UPDATE shares
     SET last_accessed_at = ?, download_count = download_count + 1
     WHERE id = ?
-  `).run(nowIso(), shareId);
+  `
+  ).run(nowIso(), shareId);
 };
 
 /**
@@ -421,9 +458,13 @@ const getShareStats = async (shareId) => {
   if (!share) return null;
 
   // Count guest sessions
-  const guestSessions = db.prepare(`
+  const guestSessions = db
+    .prepare(
+      `
     SELECT COUNT(*) as count FROM guest_sessions WHERE share_id = ?
-  `).get(shareId);
+  `
+    )
+    .get(shareId);
 
   return {
     downloadCount: share.download_count || 0,
@@ -437,9 +478,13 @@ const getShareStats = async (shareId) => {
  */
 const cleanupExpiredShares = async () => {
   const db = await getDb();
-  const result = db.prepare(`
+  const result = db
+    .prepare(
+      `
     DELETE FROM shares WHERE expires_at IS NOT NULL AND expires_at <= ?
-  `).run(nowIso());
+  `
+    )
+    .run(nowIso());
 
   return result.changes;
 };

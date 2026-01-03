@@ -51,16 +51,7 @@ const videoPreviewExtensionsSet = new Set([
   ...envVideoExtensions,
 ]);
 
-const DEFAULT_AUDIO_PREVIEW_EXTENSIONS = [
-  'mp3',
-  'wav',
-  'flac',
-  'aac',
-  'm4a',
-  'ogg',
-  'opus',
-  'wma',
-];
+const DEFAULT_AUDIO_PREVIEW_EXTENSIONS = ['mp3', 'wav', 'flac', 'aac', 'm4a', 'ogg', 'opus', 'wma'];
 
 const envAudioExtensions = (import.meta.env.VITE_AUDIO_PREVIEW_EXTENSIONS || '')
   .split(',')

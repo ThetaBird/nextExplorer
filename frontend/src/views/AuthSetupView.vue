@@ -46,7 +46,7 @@ watch(
       redirectToDestination();
     }
   },
-  { immediate: true },
+  { immediate: true }
 );
 
 onMounted(async () => {
@@ -116,7 +116,6 @@ const handleSetupSubmit = async () => {
       <p class="mt-2 text-sm text-white/60">{{ $t('auth.setup.subtitle') }}</p>
     </template>
 
-
     <form class="space-y-5" @submit.prevent="handleSetupSubmit">
       <label class="block">
         <span class="block text-sm font-medium text-white/80">{{ $t('auth.emailAddress') }}</span>
@@ -132,7 +131,9 @@ const handleSetupSubmit = async () => {
       </label>
 
       <label class="block">
-        <span class="block text-sm font-medium text-white/80">{{ $t('auth.usernameOptional') }}</span>
+        <span class="block text-sm font-medium text-white/80">{{
+          $t('auth.usernameOptional')
+        }}</span>
         <input
           id="setup-username"
           v-model="setupUsernameValue"
@@ -158,7 +159,9 @@ const handleSetupSubmit = async () => {
       </label>
 
       <label class="block">
-        <span class="block text-sm font-medium text-white/80">{{ $t('auth.confirmPassword') }}</span>
+        <span class="block text-sm font-medium text-white/80">{{
+          $t('auth.confirmPassword')
+        }}</span>
         <input
           id="setup-password-confirm"
           v-model="setupConfirmValue"
@@ -171,14 +174,13 @@ const handleSetupSubmit = async () => {
       </label>
 
       <p v-if="setupError" :class="helperTextClasses">{{ setupError }}</p>
-      <p v-else-if="statusError" :class="helperTextClasses">{{ statusError }}</p>
+      <p v-else-if="statusError" :class="helperTextClasses">
+        {{ statusError }}
+      </p>
 
       <button
         type="submit"
-        class="w-full h-12 px-4 rounded-xl 
-        bg-neutral-100 hover:bg-neutral-100/90 active:bg-neutral-100/70  
-        font-semibold text-neutral-900 
-        disabled:cursor-not-allowed disabled:opacity-60"
+        class="w-full h-12 px-4 rounded-xl bg-neutral-100 hover:bg-neutral-100/90 active:bg-neutral-100/70 font-semibold text-neutral-900 disabled:cursor-not-allowed disabled:opacity-60"
         :disabled="isSubmittingSetup"
       >
         <span v-if="isSubmittingSetup">{{ $t('common.creating') }}</span>

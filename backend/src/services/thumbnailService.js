@@ -290,9 +290,7 @@ const makeVideoThumb = async (srcPath, destPath) => {
   // Strategy 2: Extract frame at 5% of video duration
   const duration = await probeDuration(srcPath);
   const seconds =
-    duration && Number.isFinite(duration)
-      ? Math.max(1, Math.floor(duration * 0.05))
-      : 1;
+    duration && Number.isFinite(duration) ? Math.max(1, Math.floor(duration * 0.05)) : 1;
 
   await new Promise((resolve, reject) => {
     const command = ffmpeg(srcPath)
@@ -468,10 +466,7 @@ const getThumbnail = async (filePath) => {
           // Verify generation succeeded
           try {
             await fsPromises.access(thumbPath, fs.constants.F_OK);
-            logger.debug(
-              { filePath, thumbPath },
-              'Thumbnail generated successfully'
-            );
+            logger.debug({ filePath, thumbPath }, 'Thumbnail generated successfully');
             return `/static/thumbnails/${thumbFile}`;
           } catch (missing) {
             logger.warn(

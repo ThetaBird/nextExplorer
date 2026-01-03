@@ -1,25 +1,20 @@
-import { markRaw, onMounted, reactive, toRefs, unref } from "vue";
+import { markRaw, onMounted, reactive, toRefs, unref } from 'vue';
 
-import CodeMirror from "codemirror";
-import "codemirror/mode/htmlmixed/htmlmixed";
-import "codemirror/lib/codemirror.css";
-import "codemirror/theme/monokai.css";
-import "codemirror/theme/dracula.css";
-import "codemirror/theme/ambiance.css";
-import "codemirror/theme/material.css";
-import "codemirror/addon/lint/lint";
-import "codemirror/addon/lint/lint.css";
+import CodeMirror from 'codemirror';
+import 'codemirror/mode/htmlmixed/htmlmixed';
+import 'codemirror/lib/codemirror.css';
+import 'codemirror/theme/monokai.css';
+import 'codemirror/theme/dracula.css';
+import 'codemirror/theme/ambiance.css';
+import 'codemirror/theme/material.css';
+import 'codemirror/addon/lint/lint';
+import 'codemirror/addon/lint/lint.css';
 
-export default function useCodeMirror({
-  emit,
-  initialValue = "",
-  options = {},
-  textareaRef
-}) {
+export default function useCodeMirror({ emit, initialValue = '', options = {}, textareaRef }) {
   const state = reactive({
     cm: null,
     dirty: null,
-    generation: null
+    generation: null,
   });
 
   const hasErrors = () => !!state.cm.state.lint.marked.length;
@@ -36,7 +31,6 @@ export default function useCodeMirror({
   };
 
   const initialize = () => {
-
     // CodeMirror.registerHelper("lint", options.mode, function (text) {
     //   return options.lint.getAnnotations;
     // });
@@ -44,7 +38,7 @@ export default function useCodeMirror({
     // create code mirror instance
     state.cm = markRaw(
       CodeMirror.fromTextArea(textareaRef.value, {
-        ...unref(options)
+        ...unref(options),
       })
     );
 
@@ -56,9 +50,9 @@ export default function useCodeMirror({
     state.dirty = !state.cm.doc.isClean(state.generation);
 
     // synchronize with state (if dirty)
-    state.cm.on("change", (cm) => {
+    state.cm.on('change', (cm) => {
       state.dirty = !state.cm.doc.isClean(state.generation);
-      emit("change", { value: cm.getValue() });
+      emit('change', { value: cm.getValue() });
     });
   };
 
@@ -71,6 +65,6 @@ export default function useCodeMirror({
     append,
     editor,
     hasErrors,
-    setValue
+    setValue,
   };
 }

@@ -31,7 +31,10 @@ test('accessControlService honors rule order and recursion', async () => {
     assert.strictEqual(rules[0].path, 'parent/child');
 
     assert.strictEqual(await accessControlService.getPermissionForPath('parent/child'), 'hidden');
-    assert.strictEqual(await accessControlService.getPermissionForPath('parent/child/file.txt'), 'ro');
+    assert.strictEqual(
+      await accessControlService.getPermissionForPath('parent/child/file.txt'),
+      'ro'
+    );
     assert.strictEqual(await accessControlService.getPermissionForPath('parent/other'), 'ro');
     assert.strictEqual(await accessControlService.getPermissionForPath('unmatched/path'), 'rw');
   } finally {

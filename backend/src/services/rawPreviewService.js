@@ -110,9 +110,9 @@ const getRawPreviewJpegPath = async (rawFilePath) => {
       await ensureDir(path.dirname(finalPath));
 
       const extracted =
-        await tryExtract(exiftool, 'extractPreview', rawFilePath, tmpPath)
-        || await tryExtract(exiftool, 'extractThumbnail', rawFilePath, tmpPath)
-        || await tryExtract(exiftool, 'extractJpgFromRaw', rawFilePath, tmpPath);
+        (await tryExtract(exiftool, 'extractPreview', rawFilePath, tmpPath)) ||
+        (await tryExtract(exiftool, 'extractThumbnail', rawFilePath, tmpPath)) ||
+        (await tryExtract(exiftool, 'extractJpgFromRaw', rawFilePath, tmpPath));
 
       if (!extracted) {
         try {
@@ -138,4 +138,3 @@ const getRawPreviewJpegPath = async (rawFilePath) => {
 module.exports = {
   getRawPreviewJpegPath,
 };
-

@@ -41,9 +41,13 @@ const fetchJson = async (url, { timeoutMs = 5000, headers = {}, method = 'GET' }
   }
 };
 
-const discoverOpenIdConfiguration = async ({ issuer, forceRefresh = false, timeoutMs = 5000 } = {}) => {
+const discoverOpenIdConfiguration = async ({
+  issuer,
+  forceRefresh = false,
+  timeoutMs = 5000,
+} = {}) => {
   logger.debug({ issuer, forceRefresh, timeoutMs }, 'Starting OIDC configuration discovery');
-  
+
   const normalized = normalizeIssuer(issuer);
   if (!normalized) {
     logger.debug({ issuer }, 'Invalid issuer URL provided');
@@ -61,7 +65,7 @@ const discoverOpenIdConfiguration = async ({ issuer, forceRefresh = false, timeo
     logger.debug({ issuer: normalized }, 'Failed to build discovery URL');
     return null;
   }
-  
+
   logger.debug({ url }, 'Fetching OIDC configuration');
 
   const configuration = await fetchJson(url, { timeoutMs });
@@ -76,11 +80,22 @@ const discoverOpenIdConfiguration = async ({ issuer, forceRefresh = false, timeo
   return configuration;
 };
 
-const fetchUserInfoClaims = async ({ issuer, accessToken, userInfoURL = null, timeoutMs = 5000 } = {}) => {
-  logger.debug({ issuer, timeoutMs, hasOverride: Boolean(userInfoURL) }, 'Starting userinfo claims fetch');
-  
+const fetchUserInfoClaims = async ({
+  issuer,
+  accessToken,
+  userInfoURL = null,
+  timeoutMs = 5000,
+} = {}) => {
+  logger.debug(
+    { issuer, timeoutMs, hasOverride: Boolean(userInfoURL) },
+    'Starting userinfo claims fetch'
+  );
+
   if (!issuer || !accessToken) {
-    logger.debug({ issuer: !!issuer, hasToken: !!accessToken }, 'Missing required parameters for userinfo fetch');
+    logger.debug(
+      { issuer: !!issuer, hasToken: !!accessToken },
+      'Missing required parameters for userinfo fetch'
+    );
     return null;
   }
 
@@ -100,16 +115,23 @@ const fetchUserInfoClaims = async ({ issuer, accessToken, userInfoURL = null, ti
 
   // Fall back to discovery when no valid override was provided
   if (!endpoint) {
-    const configuration = await discoverOpenIdConfiguration({ issuer, timeoutMs });
-    logger.debug({ issuer, hasConfiguration: Boolean(configuration) }, 'Received OIDC configuration');
-    endpoint = configuration && configuration.userinfo_endpoint ? configuration.userinfo_endpoint : null;
+    const configuration = await discoverOpenIdConfiguration({
+      issuer,
+      timeoutMs,
+    });
+    logger.debug(
+      { issuer, hasConfiguration: Boolean(configuration) },
+      'Received OIDC configuration'
+    );
+    endpoint =
+      configuration && configuration.userinfo_endpoint ? configuration.userinfo_endpoint : null;
   }
 
   if (!endpoint) {
     logger.warn({ issuer }, 'No userinfo endpoint available (override or discovery)');
     return null;
   }
-  
+
   logger.debug({ endpoint }, 'Fetching user info from endpoint');
 
   try {

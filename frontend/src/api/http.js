@@ -7,11 +7,7 @@ const buildUrl = (endpoint) => `${apiBase}${endpoint}`;
 
 const encodePath = (relativePath = '') => {
   if (!relativePath) return '';
-  return relativePath
-    .split('/')
-    .filter(Boolean)
-    .map(encodeURIComponent)
-    .join('/');
+  return relativePath.split('/').filter(Boolean).map(encodeURIComponent).join('/');
 };
 
 const normalizePath = (relativePath = '') => {
@@ -21,7 +17,6 @@ const normalizePath = (relativePath = '') => {
   // Remove leading and trailing slashes
   return relativePath.replace(/^\/+|\/+$/g, '');
 };
-
 
 const requestRaw = async (endpoint, options = {}) => {
   const method = (options.method || 'GET').toUpperCase();
@@ -114,7 +109,6 @@ const requestRaw = async (endpoint, options = {}) => {
   }
 };
 
-
 const requestJson = async (endpoint, options = {}) => {
   const response = await requestRaw(endpoint, options);
   if (response.status === 204) {
@@ -123,11 +117,4 @@ const requestJson = async (endpoint, options = {}) => {
   return response.json();
 };
 
-export {
-  apiBase,
-  buildUrl,
-  encodePath,
-  normalizePath,
-  requestJson,
-  requestRaw
-}
+export { apiBase, buildUrl, encodePath, normalizePath, requestJson, requestRaw };

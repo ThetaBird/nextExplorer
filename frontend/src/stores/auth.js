@@ -61,7 +61,8 @@ export const useAuthStore = defineStore('auth', () => {
 
         // Cookies hold session; no token adjustments needed
       } catch (error) {
-        lastError.value = error instanceof Error ? error.message : 'Failed to load authentication status.';
+        lastError.value =
+          error instanceof Error ? error.message : 'Failed to load authentication status.';
       } finally {
         hasStatus.value = true;
         isLoading.value = false;
@@ -95,7 +96,9 @@ export const useAuthStore = defineStore('auth', () => {
 
   const logout = async () => {
     lastError.value = null;
-    try { await logoutApi(); } catch (_) {}
+    try {
+      await logoutApi();
+    } catch (_) {}
     hasStatus.value = true;
     currentUser.value = null;
   };

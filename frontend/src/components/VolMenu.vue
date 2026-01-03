@@ -53,17 +53,12 @@ const openPersonal = () => {
 <template>
   <div>
     <h4
-      class="group flex items-center justify-between pt-2 text-sm 
-    text-neutral-400 dark:text-neutral-500
-    font-medium"
+      class="group flex items-center justify-between pt-2 text-sm text-neutral-400 dark:text-neutral-500 font-medium"
     >
       {{ $t('titles.locations') }}
       <button
         @click="open = !open"
-        class="hidden group-hover:block 
-        active:text-black
-        dark:active:text-white
-        text-neutral-500"
+        class="hidden group-hover:block active:text-black dark:active:text-white text-neutral-500"
       >
         <ChevronDownIcon
           class="h-4 transition-transform duration-300 ease-in-out"
@@ -86,9 +81,7 @@ const openPersonal = () => {
             @click="openPersonal"
             :class="[
               'cursor-pointer flex w-full items-center gap-3 my-3 rounded-lg transition-colors duration-200 text-sm',
-              isActiveVolume('personal')
-                ? 'dark:text-white'
-                : 'dark:text-neutral-300/90'
+              isActiveVolume('personal') ? 'dark:text-white' : 'dark:text-neutral-300/90',
             ]"
           >
             <ServerIcon class="h-[1.38rem]" /> {{ $t('drives.personal') }}
@@ -100,9 +93,7 @@ const openPersonal = () => {
             @click="openItem(volume)"
             :class="[
               'cursor-pointer flex w-full items-center gap-3 my-3 rounded-lg transition-colors duration-200 text-sm',
-              isActiveVolume(volume.name)
-                ? 'dark:text-white'
-                : 'dark:text-neutral-300/90'
+              isActiveVolume(volume.name) ? 'dark:text-white' : 'dark:text-neutral-300/90',
             ]"
           >
             <ServerIcon class="h-[1.38rem]" /> {{ volume.name }}

@@ -10,8 +10,8 @@ const authMiddleware = async (req, res, next) => {
   // Note: /api/shares/* are management endpoints and require authentication.
   // Important: exclude /api/share/:token/browse/* so browse requests still require
   // an authenticated user and/or a valid guest session.
-  const isPublicShareRoute = requestPath.startsWith('/api/share/')
-    && !requestPath.includes('/browse/');
+  const isPublicShareRoute =
+    requestPath.startsWith('/api/share/') && !requestPath.includes('/browse/');
 
   if (!apiRoute) {
     next();
@@ -23,20 +23,20 @@ const authMiddleware = async (req, res, next) => {
     return;
   }
 
-  if (auth.enabled===false) {
+  if (auth.enabled === false) {
     // Inject a synthetic anonymous user for features that require user context
-    req.user = { 
-      id: 'anonymous', 
-      username: 'anonymous', 
-      email:'anonymous@local',  
-      displayName: 'Anonymous User', 
-      roles:['admin']
+    req.user = {
+      id: 'anonymous',
+      username: 'anonymous',
+      email: 'anonymous@local',
+      displayName: 'Anonymous User',
+      roles: ['admin'],
     };
     next();
     return;
   }
 
-  // Allow public feature flags endpoint (contains no sensitive data) 
+  // Allow public feature flags endpoint (contains no sensitive data)
   // its needed for plugin registrations
   if (requestPath === '/api/features' || requestPath.startsWith('/api/features')) {
     next();
@@ -49,10 +49,13 @@ const authMiddleware = async (req, res, next) => {
   try {
     const { onlyoffice } = require('../config/index');
     if (onlyoffice && onlyoffice.serverUrl) {
-      isOnlyofficeGuest = requestPath.startsWith('/api/onlyoffice/file')
-        || requestPath.startsWith('/api/onlyoffice/callback');
+      isOnlyofficeGuest =
+        requestPath.startsWith('/api/onlyoffice/file') ||
+        requestPath.startsWith('/api/onlyoffice/callback');
     }
-  } catch (_) { /* ignore */ }
+  } catch (_) {
+    /* ignore */
+  }
 
   if (isOnlyofficeGuest) {
     next();
@@ -70,7 +73,11 @@ const authMiddleware = async (req, res, next) => {
     });
 
     try {
-      const { getGuestSession, isGuestSessionValid, updateGuestSessionActivity } = require('../services/guestSessionService');
+      const {
+        getGuestSession,
+        isGuestSessionValid,
+        updateGuestSessionActivity,
+      } = require('../services/guestSessionService');
       if (await isGuestSessionValid(guestSessionId)) {
         const session = await getGuestSession(guestSessionId);
         req.guestSession = session;
@@ -80,7 +87,7 @@ const authMiddleware = async (req, res, next) => {
         console.log('[DEBUG] Guest session validated:', {
           sessionId: guestSessionId,
           shareId: session.shareId,
-          path: requestPath
+          path: requestPath,
         });
       } else {
         console.log('[DEBUG] Guest session invalid or expired:', guestSessionId);
@@ -103,7 +110,9 @@ const authMiddleware = async (req, res, next) => {
   }
 
   // Accept either EOC session or local session
-  const isEocAuthenticated = Boolean(req.oidc && typeof req.oidc.isAuthenticated === 'function' && req.oidc.isAuthenticated());
+  const isEocAuthenticated = Boolean(
+    req.oidc && typeof req.oidc.isAuthenticated === 'function' && req.oidc.isAuthenticated()
+  );
   const hasLocalSession = Boolean(req.session && req.session.localUserId);
   if (isEocAuthenticated || hasLocalSession) {
     try {

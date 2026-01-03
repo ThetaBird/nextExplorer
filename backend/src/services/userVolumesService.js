@@ -64,9 +64,7 @@ const getVolumeByUserAndPath = async (userId, volumePath) => {
  */
 const getUserVolumeForPath = async (userId, relativePath) => {
   const db = await getDb();
-  const volumes = db
-    .prepare('SELECT * FROM user_volumes WHERE user_id = ?')
-    .all(userId);
+  const volumes = db.prepare('SELECT * FROM user_volumes WHERE user_id = ?').all(userId);
 
   // Normalize the relative path
   const normalizedPath = relativePath.replace(/^\/+/, '').replace(/\/+$/, '');
@@ -165,14 +163,14 @@ const addVolumeToUser = async ({ userId, label, volumePath, accessMode = 'readwr
   const id = generateId();
   const now = nowIso();
 
-  db.prepare(`
+  db.prepare(
+    `
     INSERT INTO user_volumes (id, user_id, label, path, access_mode, created_at, updated_at)
     VALUES (?, ?, ?, ?, ?, ?, ?)
-  `).run(id, userId, label.trim(), normalizedPath, accessMode, now, now);
+  `
+  ).run(id, userId, label.trim(), normalizedPath, accessMode, now, now);
 
-  return toClientVolume(
-    db.prepare('SELECT * FROM user_volumes WHERE id = ?').get(id)
-  );
+  return toClientVolume(db.prepare('SELECT * FROM user_volumes WHERE id = ?').get(id));
 };
 
 /**
@@ -232,13 +230,9 @@ const updateUserVolume = async (volumeId, { label, accessMode }) => {
   values.push(nowIso());
   values.push(volumeId);
 
-  db.prepare(`UPDATE user_volumes SET ${updates.join(', ')} WHERE id = ?`).run(
-    ...values
-  );
+  db.prepare(`UPDATE user_volumes SET ${updates.join(', ')} WHERE id = ?`).run(...values);
 
-  return toClientVolume(
-    db.prepare('SELECT * FROM user_volumes WHERE id = ?').get(volumeId)
-  );
+  return toClientVolume(db.prepare('SELECT * FROM user_volumes WHERE id = ?').get(volumeId));
 };
 
 /**
@@ -281,9 +275,7 @@ const userHasVolumeAccess = async (userId, volumePath) => {
  */
 const resolveUserVolumePath = async (userId, logicalPath) => {
   const db = await getDb();
-  const volumes = db
-    .prepare('SELECT * FROM user_volumes WHERE user_id = ?')
-    .all(userId);
+  const volumes = db.prepare('SELECT * FROM user_volumes WHERE user_id = ?').all(userId);
 
   // Normalize the logical path
   const normalizedPath = logicalPath.replace(/^\/+/, '').replace(/\/+$/, '');
@@ -299,9 +291,7 @@ const resolveUserVolumePath = async (userId, logicalPath) => {
     if (vol.label === firstSegment) {
       // Found matching volume - construct the absolute path
       const remainingPath = pathParts.slice(1).join('/');
-      const absolutePath = remainingPath
-        ? path.join(vol.path, remainingPath)
-        : vol.path;
+      const absolutePath = remainingPath ? path.join(vol.path, remainingPath) : vol.path;
 
       return {
         volume: toClientVolume(vol),

@@ -47,11 +47,13 @@ const buildApp = () => {
   const app = express();
   app.use(express.json());
   app.use(cookieParser());
-  app.use(session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-  }));
+  app.use(
+    session({
+      secret: process.env.SESSION_SECRET,
+      resave: false,
+      saveUninitialized: false,
+    })
+  );
 
   // Minimal stub for req.oidc so auth middleware doesn't treat requests as EOC-authenticated.
   app.use((req, _res, next) => {
@@ -81,7 +83,11 @@ test('authenticated user takes precedence over guest session when browsing volum
   const ownerAgent = request.agent(app);
   await ownerAgent
     .post('/api/auth/setup')
-    .send({ email: 'owner@example.com', username: 'owner', password: 'secret123' })
+    .send({
+      email: 'owner@example.com',
+      username: 'owner',
+      password: 'secret123',
+    })
     .expect(201);
 
   // Create an anyone share so a guest session can be created.
@@ -98,9 +104,7 @@ test('authenticated user takes precedence over guest session when browsing volum
   assert.ok(token);
 
   // Simulate a guest opening the share link to create a guest session.
-  const guestAccess = await request(app)
-    .get(`/api/share/${token}/access`)
-    .expect(200);
+  const guestAccess = await request(app).get(`/api/share/${token}/access`).expect(200);
 
   const guestSessionId = guestAccess.body?.guestSessionId;
   assert.ok(guestSessionId);
@@ -115,4 +119,3 @@ test('authenticated user takes precedence over guest session when browsing volum
   const names = (browse.body.items || []).map((item) => item.name);
   assert.ok(names.includes('hello.txt'));
 });
-

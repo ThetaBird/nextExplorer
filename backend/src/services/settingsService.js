@@ -101,10 +101,7 @@ const setSettings = async (partial) => {
   const merged = {
     thumbnails: { ...current.thumbnails, ...(partial.thumbnails || {}) },
     access: {
-      rules:
-        partial.access?.rules !== undefined
-          ? partial.access.rules
-          : current.access.rules,
+      rules: partial.access?.rules !== undefined ? partial.access.rules : current.access.rules,
     },
   };
 

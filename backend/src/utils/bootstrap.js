@@ -26,12 +26,17 @@ const ensureEnvAdminUser = async () => {
   }
 
   if (!supportsLocalAuth()) {
-    logger.info({ authMode: auth?.mode }, 'AUTH_ADMIN_* provided but local auth is disabled; skipping admin bootstrap.');
+    logger.info(
+      { authMode: auth?.mode },
+      'AUTH_ADMIN_* provided but local auth is disabled; skipping admin bootstrap.'
+    );
     return;
   }
 
   if (!email || !password) {
-    logger.warn('AUTH_ADMIN_EMAIL and AUTH_ADMIN_PASSWORD must both be set to bootstrap an admin user.');
+    logger.warn(
+      'AUTH_ADMIN_EMAIL and AUTH_ADMIN_PASSWORD must both be set to bootstrap an admin user.'
+    );
     return;
   }
 
@@ -45,10 +50,17 @@ const ensureEnvAdminUser = async () => {
 
   const ensureAdminRole = async (userId, rolesJson) => {
     let roles = [];
-    try { roles = JSON.parse(rolesJson || '[]'); } catch (_) { roles = []; }
+    try {
+      roles = JSON.parse(rolesJson || '[]');
+    } catch (_) {
+      roles = [];
+    }
     if (!Array.isArray(roles)) roles = [];
     if (!roles.includes('admin')) {
-      await updateUserRoles({ userId, roles: [...new Set([...roles, 'admin'])] });
+      await updateUserRoles({
+        userId,
+        roles: [...new Set([...roles, 'admin'])],
+      });
     }
   };
 
@@ -73,7 +85,10 @@ const ensureEnvAdminUser = async () => {
 
     const user = await getByEmail(normalizedEmail);
     if (!user) {
-      logger.warn({ email: normalizedEmail }, 'Unable to locate admin user after bootstrap attempt; skipping.');
+      logger.warn(
+        { email: normalizedEmail },
+        'Unable to locate admin user after bootstrap attempt; skipping.'
+      );
       return;
     }
 
@@ -94,14 +109,16 @@ const bootstrap = async () => {
     ['thumbnails', directories.thumbnails],
   ];
 
-  await Promise.all(dirEntries.map(async ([name, dir]) => {
-    try {
-      await ensureDir(dir);
-      logger.debug({ dir }, `${name} directory ensured`);
-    } catch (error) {
-      logger.warn({ directory: dir, err: error }, `Unable to prepare ${name} directory`);
-    }
-  }));
+  await Promise.all(
+    dirEntries.map(async ([name, dir]) => {
+      try {
+        await ensureDir(dir);
+        logger.debug({ dir }, `${name} directory ensured`);
+      } catch (error) {
+        logger.warn({ directory: dir, err: error }, `Unable to prepare ${name} directory`);
+      }
+    })
+  );
 
   await ensureEnvAdminUser();
   logger.debug('Bootstrap complete');

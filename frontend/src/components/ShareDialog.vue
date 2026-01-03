@@ -156,7 +156,10 @@ function toggleUserSelection(userId) {
 
 async function createShareLink() {
   if (!sourcePath.value) {
-    error.value = t('share.errors.invalidSourcePath', 'Unable to determine the item path to share.');
+    error.value = t(
+      'share.errors.invalidSourcePath',
+      'Unable to determine the item path to share.'
+    );
     return;
   }
 
@@ -187,7 +190,8 @@ async function createShareLink() {
       sharingType: sharingType.value,
       password: enablePassword.value ? password.value : null,
       userIds: sharingType.value === 'users' ? selectedUserIds.value : [],
-      expiresAt: enableExpiry.value && expiresAtDate.value ? expiresAtDate.value.toISOString() : null,
+      expiresAt:
+        enableExpiry.value && expiresAtDate.value ? expiresAtDate.value.toISOString() : null,
       label: label.value || null,
     };
 
@@ -260,11 +264,19 @@ function closeDialog() {
       <div class="grid grid-cols-2 gap-4 text-sm">
         <div>
           <span class="text-gray-500 dark:text-gray-400">{{ t('share.access') }}</span>
-          <span class="ml-2 font-medium">{{ shareResult.accessMode === 'readonly' ? t('settings.access.readOnly') : t('settings.access.readWrite') }}</span>
+          <span class="ml-2 font-medium">{{
+            shareResult.accessMode === 'readonly'
+              ? t('settings.access.readOnly')
+              : t('settings.access.readWrite')
+          }}</span>
         </div>
         <div>
           <span class="text-gray-500 dark:text-gray-400">{{ t('share.type') }}</span>
-          <span class="ml-2 font-medium">{{ shareResult.sharingType === 'anyone' ? t('share.anyoneWithLink') : t('share.specificUsers') }}</span>
+          <span class="ml-2 font-medium">{{
+            shareResult.sharingType === 'anyone'
+              ? t('share.anyoneWithLink')
+              : t('share.specificUsers')
+          }}</span>
         </div>
         <div v-if="shareResult.hasPassword">
           <span class="text-gray-500 dark:text-gray-400">{{ t('share.password') }}</span>
@@ -272,7 +284,9 @@ function closeDialog() {
         </div>
         <div v-if="shareResult.expiresAt">
           <span class="text-gray-500 dark:text-gray-400">{{ t('share.expires') }}</span>
-          <span class="ml-2 font-medium">{{ new Date(shareResult.expiresAt).toLocaleDateString() }}</span>
+          <span class="ml-2 font-medium">{{
+            new Date(shareResult.expiresAt).toLocaleDateString()
+          }}</span>
         </div>
       </div>
 
@@ -288,13 +302,18 @@ function closeDialog() {
 
     <!-- Share creation form -->
     <div v-else class="space-y-4">
-      <div v-if="error" class="p-3 text-sm text-red-700 rounded-lg bg-red-50 dark:bg-red-900/20 dark:text-red-200">
+      <div
+        v-if="error"
+        class="p-3 text-sm text-red-700 rounded-lg bg-red-50 dark:bg-red-900/20 dark:text-red-200"
+      >
         {{ error }}
       </div>
 
       <!-- Source info -->
       <div class="p-3 rounded-lg bg-zinc-50 dark:bg-zinc-800">
-        <div class="text-sm text-gray-500 dark:text-gray-400">{{ t('share.sharing') }}</div>
+        <div class="text-sm text-gray-500 dark:text-gray-400">
+          {{ t('share.sharing') }}
+        </div>
         <div class="font-medium">{{ item?.name }}</div>
         <div class="text-xs text-gray-500">{{ sourcePath }}</div>
       </div>
@@ -317,18 +336,22 @@ function closeDialog() {
           <button
             @click="accessMode = 'readonly'"
             class="px-4 py-2 text-sm font-medium transition border rounded-lg"
-            :class="accessMode === 'readonly'
-              ? 'bg-blue-600 text-white border-blue-600'
-              : 'border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800'"
+            :class="
+              accessMode === 'readonly'
+                ? 'bg-blue-600 text-white border-blue-600'
+                : 'border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+            "
           >
             {{ t('settings.access.readOnly') }}
           </button>
           <button
             @click="accessMode = 'readwrite'"
             class="px-4 py-2 text-sm font-medium transition border rounded-lg"
-            :class="accessMode === 'readwrite'
-              ? 'bg-blue-600 text-white border-blue-600'
-              : 'border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800'"
+            :class="
+              accessMode === 'readwrite'
+                ? 'bg-blue-600 text-white border-blue-600'
+                : 'border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+            "
           >
             {{ t('settings.access.readWrite') }}
           </button>
@@ -342,9 +365,11 @@ function closeDialog() {
           <button
             @click="sharingType = 'anyone'"
             class="flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium transition border rounded-lg"
-            :class="sharingType === 'anyone'
-              ? 'bg-blue-600 text-white border-blue-600'
-              : 'border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800'"
+            :class="
+              sharingType === 'anyone'
+                ? 'bg-blue-600 text-white border-blue-600'
+                : 'border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+            "
           >
             <GlobeAltIcon class="w-4 h-4" />
             {{ t('share.anyoneWithLink') }}
@@ -352,9 +377,11 @@ function closeDialog() {
           <button
             @click="sharingType = 'users'"
             class="flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium transition border rounded-lg"
-            :class="sharingType === 'users'
-              ? 'bg-blue-600 text-white border-blue-600'
-              : 'border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800'"
+            :class="
+              sharingType === 'users'
+                ? 'bg-blue-600 text-white border-blue-600'
+                : 'border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+            "
           >
             <UsersIcon class="w-4 h-4" />
             {{ t('share.specificUsers') }}
@@ -363,10 +390,17 @@ function closeDialog() {
       </div>
 
       <!-- User Selection (if sharing type is 'users') -->
-      <div v-if="sharingType === 'users'" class="p-3 border rounded-lg border-zinc-300 dark:border-zinc-700">
+      <div
+        v-if="sharingType === 'users'"
+        class="p-3 border rounded-lg border-zinc-300 dark:border-zinc-700"
+      >
         <div class="mb-2 text-sm font-medium">{{ t('share.selectUsers') }}</div>
-        <div v-if="loadingUsers" class="text-sm text-gray-500">{{ t('share.loadingUsers') }}</div>
-        <div v-else-if="availableUsers.length === 0" class="text-sm text-gray-500">{{ t('share.noUsersAvailable') }}</div>
+        <div v-if="loadingUsers" class="text-sm text-gray-500">
+          {{ t('share.loadingUsers') }}
+        </div>
+        <div v-else-if="availableUsers.length === 0" class="text-sm text-gray-500">
+          {{ t('share.noUsersAvailable') }}
+        </div>
         <div v-else class="space-y-2 max-h-40 overflow-y-auto">
           <label
             v-for="user in availableUsers"
@@ -451,7 +485,9 @@ function closeDialog() {
 .dark .flatpickr-calendar {
   background: rgb(24 24 27 / 0.98);
   border-color: rgb(63 63 70);
-  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.4), 0 10px 10px -5px rgb(0 0 0 / 0.25);
+  box-shadow:
+    0 20px 25px -5px rgb(0 0 0 / 0.4),
+    0 10px 10px -5px rgb(0 0 0 / 0.25);
 }
 .dark .flatpickr-months .flatpickr-month,
 .dark .flatpickr-current-month,

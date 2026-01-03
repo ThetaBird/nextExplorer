@@ -18,7 +18,7 @@ const configureHttpLogging = (app) => {
       },
     })
   );
-  
+
   logger.debug('HTTP logging middleware configured');
 };
 

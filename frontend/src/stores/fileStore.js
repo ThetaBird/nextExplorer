@@ -28,7 +28,9 @@ export const useFileStore = defineStore('fileStore', () => {
   const thumbnailRequests = new Map();
 
   const hasSelection = computed(() => selectedItems.value.length > 0);
-  const hasClipboardItems = computed(() => copiedItems.value.length > 0 || cutItems.value.length > 0);
+  const hasClipboardItems = computed(
+    () => copiedItems.value.length > 0 || cutItems.value.length > 0
+  );
 
   const itemKey = (item) => {
     if (!item || !item.name) {
@@ -51,13 +53,14 @@ export const useFileStore = defineStore('fileStore', () => {
     return normalizePath(combined);
   };
 
-  const serializeItems = (items) => items
-    .filter((item) => item && item.name && item.kind !== 'volume')
-    .map((item) => ({
-      name: item.name,
-      path: normalizePath(item.path || ''),
-      kind: item.kind,
-    }));
+  const serializeItems = (items) =>
+    items
+      .filter((item) => item && item.name && item.kind !== 'volume')
+      .map((item) => ({
+        name: item.name,
+        path: normalizePath(item.path || ''),
+        kind: item.kind,
+      }));
 
   const resetClipboard = () => {
     copiedItems.value = [];
@@ -132,9 +135,8 @@ export const useFileStore = defineStore('fileStore', () => {
     const destination = normalizePath(currentPath.value || '');
 
     // Determine a default base name and extension
-    const defaultName = (typeof baseName === 'string' && baseName.trim())
-      ? baseName.trim()
-      : 'Untitled.txt';
+    const defaultName =
+      typeof baseName === 'string' && baseName.trim() ? baseName.trim() : 'Untitled.txt';
 
     // Split name into stem + extension (preserve provided extension if present)
     const lastDot = defaultName.lastIndexOf('.');
@@ -142,7 +144,9 @@ export const useFileStore = defineStore('fileStore', () => {
     const ext = lastDot > 0 ? defaultName.slice(lastDot) : '';
 
     // Ensure the name is unique in current listing
-    const existingNames = new Set((currentPathItems.value || []).map((it) => it?.name).filter(Boolean));
+    const existingNames = new Set(
+      (currentPathItems.value || []).map((it) => it?.name).filter(Boolean)
+    );
     let candidate = `${stem}${ext}`;
     let counter = 2;
     while (existingNames.has(candidate)) {
@@ -302,7 +306,7 @@ export const useFileStore = defineStore('fileStore', () => {
 
     return pending;
   };
-  
+
   const getCurrentPath = computed(() => currentPath.value);
 
   const getCurrentPathItems = computed(() => {
@@ -317,11 +321,9 @@ export const useFileStore = defineStore('fileStore', () => {
       const aValue = a[settings.sortBy.by];
       const bValue = b[settings.sortBy.by];
       if (aValue === bValue) return 0;
-      
+
       if (typeof aValue === 'string' && typeof bValue === 'string') {
-        return (
-          aValue.localeCompare(bValue, undefined, { sensitivity: 'base' }) * direction
-        );
+        return aValue.localeCompare(bValue, undefined, { sensitivity: 'base' }) * direction;
       }
       return (aValue > bValue ? 1 : -1) * direction;
     });
@@ -333,9 +335,7 @@ export const useFileStore = defineStore('fileStore', () => {
   }
 
   async function fetchPathItems(path) {
-    const previousItems = Array.isArray(currentPathItems.value)
-      ? currentPathItems.value
-      : [];
+    const previousItems = Array.isArray(currentPathItems.value) ? currentPathItems.value : [];
 
     const normalizedPath = normalizePath(typeof path === 'string' ? path : currentPath.value);
     currentPath.value = normalizedPath;
@@ -362,9 +362,7 @@ export const useFileStore = defineStore('fileStore', () => {
       if (!Array.isArray(items)) return [];
 
       const existingByKey = new Map(
-        previousItems
-          .filter((it) => it && it.name)
-          .map((it) => [itemKey(it), it]),
+        previousItems.filter((it) => it && it.name).map((it) => [itemKey(it), it])
       );
 
       const merged = [];
@@ -395,9 +393,8 @@ export const useFileStore = defineStore('fileStore', () => {
     // Handle new response format with items and access metadata
     if (response && typeof response === 'object' && Array.isArray(response.items)) {
       currentPathItems.value = mergeItems(response.items);
-      const access = response.access && typeof response.access === 'object'
-        ? response.access
-        : null;
+      const access =
+        response.access && typeof response.access === 'object' ? response.access : null;
       currentPathData.value = {
         path: response.path || normalizedPath,
         canRead: access?.canRead ?? true,

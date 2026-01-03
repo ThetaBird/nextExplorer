@@ -7,25 +7,26 @@ const { normalizeBoolean, parseByteSize } = require('../utils/env');
 module.exports = {
   // Server
   PORT: Number(process.env.PORT) || 3000,
-  
+
   // Paths
   VOLUME_ROOT: process.env.VOLUME_ROOT || '/mnt',
   CONFIG_DIR: process.env.CONFIG_DIR || '/config',
   CACHE_DIR: process.env.CACHE_DIR || '/cache',
   USER_ROOT: process.env.USER_ROOT || '',
-  
+
   // Public URL & Network
   PUBLIC_URL: process.env.PUBLIC_URL?.trim() || null,
   TRUST_PROXY: process.env.TRUST_PROXY?.trim().toLowerCase(),
-  
+
   // CORS
-  CORS_ORIGINS: process.env.CORS_ORIGIN || process.env.CORS_ORIGINS || process.env.ALLOWED_ORIGINS || '',
-  
+  CORS_ORIGINS:
+    process.env.CORS_ORIGIN || process.env.CORS_ORIGINS || process.env.ALLOWED_ORIGINS || '',
+
   // Logging
   LOG_LEVEL: process.env.LOG_LEVEL?.trim().toLowerCase() || null,
   DEBUG: normalizeBoolean(process.env.DEBUG),
   ENABLE_HTTP_LOGGING: normalizeBoolean(process.env.ENABLE_HTTP_LOGGING) || false,
-  
+
   // Auth
   AUTH_ENABLED: normalizeBoolean(process.env.AUTH_ENABLED),
   AUTH_MODE: process.env.AUTH_MODE?.trim().toLowerCase() || null,
@@ -34,7 +35,7 @@ module.exports = {
   AUTH_LOCK_MINUTES: Number(process.env.AUTH_LOCK_MINUTES) || 15,
   AUTH_ADMIN_EMAIL: process.env.AUTH_ADMIN_EMAIL?.trim() || process.env.ADMIN_EMAIL?.trim() || null,
   AUTH_ADMIN_PASSWORD: process.env.AUTH_ADMIN_PASSWORD || process.env.ADMIN_PASSWORD || null,
-  
+
   // OIDC
   OIDC_ENABLED: normalizeBoolean(process.env.OIDC_ENABLED),
   OIDC_ISSUER: process.env.OIDC_ISSUER || process.env.OIDC_ISSUER_URL || null,
@@ -49,19 +50,19 @@ module.exports = {
   OIDC_REQUIRE_EMAIL_VERIFIED: normalizeBoolean(process.env.OIDC_REQUIRE_EMAIL_VERIFIED) || false,
   // When false, OIDC login is only allowed for users that already exist in the DB (local or OIDC-linked).
   OIDC_AUTO_CREATE_USERS: normalizeBoolean(process.env.OIDC_AUTO_CREATE_USERS) ?? true,
-  
+
   // Search
   SEARCH_DEEP: normalizeBoolean(process.env.SEARCH_DEEP),
   SEARCH_RIPGREP: normalizeBoolean(process.env.SEARCH_RIPGREP),
   SEARCH_MAX_FILESIZE: process.env.SEARCH_MAX_FILESIZE?.trim() || null,
-  
+
   // OnlyOffice
   ONLYOFFICE_URL: process.env.ONLYOFFICE_URL?.trim() || null,
   ONLYOFFICE_SECRET: process.env.ONLYOFFICE_SECRET || null,
   ONLYOFFICE_LANG: process.env.ONLYOFFICE_LANG?.trim() || 'en',
   ONLYOFFICE_FORCE_SAVE: normalizeBoolean(process.env.ONLYOFFICE_FORCE_SAVE) || false,
   ONLYOFFICE_FILE_EXTENSIONS: process.env.ONLYOFFICE_FILE_EXTENSIONS || '',
-  
+
   // Features
   SHOW_VOLUME_USAGE: normalizeBoolean(process.env.SHOW_VOLUME_USAGE) || false,
   USER_DIR_ENABLED: normalizeBoolean(process.env.USER_DIR_ENABLED) || false,

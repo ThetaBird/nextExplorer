@@ -6,12 +6,13 @@ const logger = require('../utils/logger');
  */
 const configureHttpsWarning = (app) => {
   let warnedInsecureOverHttps = false;
-  
+
   app.use((req, _res, next) => {
     try {
-      const isHttps = req.secure || 
+      const isHttps =
+        req.secure ||
         (req.headers['x-forwarded-proto'] || '').toString().split(',')[0].trim() === 'https';
-      
+
       if (isHttps && !warnedInsecureOverHttps) {
         warnedInsecureOverHttps = true;
         logger.warn(
@@ -23,7 +24,7 @@ const configureHttpsWarning = (app) => {
     } catch (_) {}
     next();
   });
-  
+
   logger.debug('HTTPS warning middleware configured');
 };
 

@@ -63,7 +63,7 @@ class TerminalService {
 
     const wss = new WebSocket.Server({
       server,
-      path: '/api/terminal'
+      path: '/api/terminal',
     });
 
     wss.on('connection', (ws, req) => {
@@ -74,24 +74,32 @@ class TerminalService {
         const session = this.validateSessionToken(token);
 
         if (!session) {
-          logger.warn({ url: req.url }, 'Rejected terminal WebSocket connection: invalid or expired token');
+          logger.warn(
+            { url: req.url },
+            'Rejected terminal WebSocket connection: invalid or expired token'
+          );
           ws.close(1008, 'Invalid or expired terminal session token');
           return;
         }
 
-        logger.info({
-          url: req.url,
-          headers: req.headers,
-          userId: session.userId,
-          roles: session.roles,
-        }, 'Terminal WebSocket connection established for admin user');
+        logger.info(
+          {
+            url: req.url,
+            headers: req.headers,
+            userId: session.userId,
+            roles: session.roles,
+          },
+          'Terminal WebSocket connection established for admin user'
+        );
 
         this.handleConnection(ws);
       } catch (error) {
         logger.error({ err: error }, 'Error handling terminal WebSocket connection');
         try {
           ws.close(1011, 'Internal server error');
-        } catch (_) { /* ignore */ }
+        } catch (_) {
+          /* ignore */
+        }
       }
     });
 
@@ -107,12 +115,15 @@ class TerminalService {
     const terminalId = Date.now().toString();
     const shell = process.env.SHELL || 'bash';
 
-    logger.info({
-      terminalId,
-      shell,
-      cwd: process.env.HOME,
-      wsReadyState: ws.readyState
-    }, 'Attempting to spawn terminal process');
+    logger.info(
+      {
+        terminalId,
+        shell,
+        cwd: process.env.HOME,
+        wsReadyState: ws.readyState,
+      },
+      'Attempting to spawn terminal process'
+    );
 
     try {
       const ptyProcess = pty.spawn(shell, [], {
@@ -127,11 +138,14 @@ class TerminalService {
           FORCE_COLOR: '1',
           CLICOLOR: '1',
           CLICOLOR_FORCE: '1',
-        }
+        },
       });
 
       this.terminals.set(terminalId, ptyProcess);
-      logger.info({ terminalId, shell, pid: ptyProcess.pid }, 'Terminal process spawned successfully');
+      logger.info(
+        { terminalId, shell, pid: ptyProcess.pid },
+        'Terminal process spawned successfully'
+      );
 
       ptyProcess.on('data', (data) => {
         try {
@@ -140,7 +154,10 @@ class TerminalService {
             ws.send(data);
             logger.debug({ terminalId }, 'Sent data to WebSocket client');
           } else {
-            logger.warn({ terminalId, readyState: ws.readyState }, 'WebSocket not open, cannot send data');
+            logger.warn(
+              { terminalId, readyState: ws.readyState },
+              'WebSocket not open, cannot send data'
+            );
           }
         } catch (error) {
           logger.error({ err: error, terminalId }, 'Error sending data to WebSocket');
@@ -149,7 +166,10 @@ class TerminalService {
 
       ws.on('message', (message) => {
         try {
-          logger.debug({ terminalId, messageLength: message.length }, 'Received message from WebSocket client');
+          logger.debug(
+            { terminalId, messageLength: message.length },
+            'Received message from WebSocket client'
+          );
           ptyProcess.write(message);
         } catch (error) {
           logger.error({ err: error, terminalId }, 'Error writing to terminal');
@@ -165,7 +185,6 @@ class TerminalService {
       ws.on('error', (error) => {
         logger.error({ err: error, terminalId }, 'WebSocket error');
       });
-
     } catch (error) {
       logger.error({ err: error }, 'Failed to spawn terminal process');
       ws.close();

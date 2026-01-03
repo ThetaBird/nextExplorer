@@ -44,13 +44,12 @@ const shouldOidcCookieBeSecure = (baseURL) => {
  * Resolves OIDC scopes, ensuring 'openid' is always included
  */
 const resolveOidcScopes = (oidc) => {
-  const scopes = Array.isArray(oidc.scopes) && oidc.scopes.length 
-    ? oidc.scopes 
-    : ['openid', 'profile', 'email'];
-  
+  const scopes =
+    Array.isArray(oidc.scopes) && oidc.scopes.length ? oidc.scopes : ['openid', 'profile', 'email'];
+
   const scopeParam = Array.from(new Set(['openid', ...scopes])).join(' ');
   logger.debug({ scopes, scopeParam }, 'OIDC scopes resolved');
-  
+
   return scopeParam;
 };
 
@@ -60,18 +59,18 @@ const resolveOidcScopes = (oidc) => {
 const createAfterCallbackHandler = (oidc, envAuthConfig) => {
   return async (req, res, session) => {
     logger.debug('afterCallback: start');
-    
+
     try {
       const persistIssuer = oidc.issuer;
       const accessToken = session?.access_token;
 
       const hasOidc = Boolean(req?.oidc);
       logger.debug(
-        { 
-          hasOidc, 
-          accessTokenPresent: Boolean(accessToken), 
-          persistIssuer 
-        }, 
+        {
+          hasOidc,
+          accessTokenPresent: Boolean(accessToken),
+          persistIssuer,
+        },
         'OIDC user login state'
       );
 
@@ -80,7 +79,7 @@ const createAfterCallbackHandler = (oidc, envAuthConfig) => {
       // Prefer already-decoded user claims if available on req.oidc.user
       const hasReqUser = Boolean(req?.oidc?.user && req.oidc.user.sub);
       logger.debug({ hasReqUser }, 'afterCallback: req.oidc.user presence');
-      
+
       if (hasReqUser) {
         claims = req.oidc.user;
         logger.debug('afterCallback: using req.oidc.user');
@@ -89,12 +88,12 @@ const createAfterCallbackHandler = (oidc, envAuthConfig) => {
       // Fetch from userinfo endpoint if access token is available
       if (accessToken && persistIssuer) {
         logger.debug('afterCallback: fetching userinfo via direct HTTP');
-        const directClaims = await fetchUserInfoClaims({ 
-          issuer: persistIssuer, 
-          accessToken, 
-          userInfoURL: oidc.userInfoURL 
+        const directClaims = await fetchUserInfoClaims({
+          issuer: persistIssuer,
+          accessToken,
+          userInfoURL: oidc.userInfoURL,
         });
-        
+
         if (directClaims && directClaims.sub) {
           claims = directClaims;
           logger.debug('afterCallback: direct userinfo fetch succeeded');
@@ -126,14 +125,14 @@ const createAfterCallbackHandler = (oidc, envAuthConfig) => {
       const roles = deriveRolesFromClaims(claims, envAuthConfig?.oidc?.adminGroups);
 
       logger.debug(
-        { 
-          sub, 
-          preferredUsername, 
-          displayName, 
-          email, 
-          emailVerified, 
+        {
+          sub,
+          preferredUsername,
+          displayName,
+          email,
+          emailVerified,
           roles,
-        }, 
+        },
         'afterCallback: derived user info'
       );
 
@@ -149,7 +148,7 @@ const createAfterCallbackHandler = (oidc, envAuthConfig) => {
         requireEmailVerified: envAuthConfig?.oidc?.requireEmailVerified || false,
         autoCreateUsers: envAuthConfig?.oidc?.autoCreateUsers ?? true,
       });
-      
+
       logger.debug('afterCallback: user persisted/synced');
     } catch (e) {
       // If user sync fails, block login only for operational/expected errors
@@ -159,7 +158,7 @@ const createAfterCallbackHandler = (oidc, envAuthConfig) => {
       }
       logger.warn({ err: e }, 'afterCallback user sync failed');
     }
-    
+
     logger.debug('afterCallback: complete');
     return session;
   };
@@ -171,32 +170,29 @@ const createAfterCallbackHandler = (oidc, envAuthConfig) => {
 const configureOidc = async (app) => {
   try {
     logger.debug('Configuring Express OpenID Connect');
-    
+
     const oidc = (envAuthConfig && envAuthConfig.oidc) || {};
-    
+
     // Resolve configuration
     const scopeParam = resolveOidcScopes(oidc);
     const baseURL = deriveBaseUrl(oidc);
-    const sessionSecret = (envAuthConfig && envAuthConfig.sessionSecret)
-      || process.env.SESSION_SECRET
-      || crypto.randomBytes(32).toString('hex');
+    const sessionSecret =
+      (envAuthConfig && envAuthConfig.sessionSecret) ||
+      process.env.SESSION_SECRET ||
+      crypto.randomBytes(32).toString('hex');
 
     // Check if OIDC should be enabled
     const eocEnabled = Boolean(
-      oidc.enabled && 
-      oidc.issuer && 
-      oidc.clientId && 
-      sessionSecret && 
-      baseURL
+      oidc.enabled && oidc.issuer && oidc.clientId && sessionSecret && baseURL
     );
-    
+
     logger.debug(
-      { 
-        enabled: eocEnabled, 
-        issuer: !!oidc.issuer, 
-        clientId: !!oidc.clientId, 
-        baseURL: !!baseURL 
-      }, 
+      {
+        enabled: eocEnabled,
+        issuer: !!oidc.issuer,
+        clientId: !!oidc.clientId,
+        baseURL: !!baseURL,
+      },
       'EOC enablement check'
     );
 
@@ -204,13 +200,16 @@ const configureOidc = async (app) => {
       logger.info(
         'Express OpenID Connect not configured (missing issuer/client/baseURL/secret or disabled)'
       );
-      logger.debug({
-        enabled: Boolean(oidc.enabled),
-        hasIssuer: Boolean(oidc.issuer),
-        hasClientId: Boolean(oidc.clientId),
-        hasSecret: Boolean(sessionSecret),
-        hasBaseURL: Boolean(baseURL),
-      }, 'EOC configuration details');
+      logger.debug(
+        {
+          enabled: Boolean(oidc.enabled),
+          hasIssuer: Boolean(oidc.issuer),
+          hasClientId: Boolean(oidc.clientId),
+          hasSecret: Boolean(sessionSecret),
+          hasBaseURL: Boolean(baseURL),
+        },
+        'EOC configuration details'
+      );
       return;
     }
 
@@ -220,30 +219,32 @@ const configureOidc = async (app) => {
     logger.debug('Using shared SQLite session store for OIDC');
 
     // Configure OIDC middleware
-    app.use(eocAuth({
-      authRequired: false,
-      auth0Logout: false,
-      idpLogout: false,
-      issuerBaseURL: oidc.issuer,
-      baseURL,
-      clientID: oidc.clientId,
-      clientSecret: oidc.clientSecret || undefined,
-      secret: sessionSecret,
-      authorizationParams: {
-        response_type: 'code',
-        scope: scopeParam,
-      },
-      session: {
-        store: oidcStore,
-        rolling: true,
-        cookie: {
-          sameSite: 'Lax',
-          secure: eocCookieSecure,
-          httpOnly: true,
+    app.use(
+      eocAuth({
+        authRequired: false,
+        auth0Logout: false,
+        idpLogout: false,
+        issuerBaseURL: oidc.issuer,
+        baseURL,
+        clientID: oidc.clientId,
+        clientSecret: oidc.clientSecret || undefined,
+        secret: sessionSecret,
+        authorizationParams: {
+          response_type: 'code',
+          scope: scopeParam,
         },
-      },
-      afterCallback: createAfterCallbackHandler(oidc, envAuthConfig),
-    }));
+        session: {
+          store: oidcStore,
+          rolling: true,
+          cookie: {
+            sameSite: 'Lax',
+            secure: eocCookieSecure,
+            httpOnly: true,
+          },
+        },
+        afterCallback: createAfterCallbackHandler(oidc, envAuthConfig),
+      })
+    );
 
     logger.info('Express OpenID Connect is configured');
     logger.debug('EOC middleware mounted');

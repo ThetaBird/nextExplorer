@@ -34,11 +34,11 @@ const configureStaticFiles = (app) => {
 
       res.sendFile(indexFile);
     });
-    
+
     logger.debug('Configured SPA fallback routing');
   } else {
     logger.warn(
-      { frontendDir, indexFile }, 
+      { frontendDir, indexFile },
       'Frontend directory or index.html not found - skipping static file serving'
     );
   }

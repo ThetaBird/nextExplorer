@@ -3,11 +3,7 @@ const apiBase = (import.meta.env.VITE_API_URL || DEFAULT_API_BASE).replace(/\/$/
 
 const encodePath = (relativePath = '') => {
   if (!relativePath) return '';
-  return relativePath
-    .split('/')
-    .filter(Boolean)
-    .map(encodeURIComponent)
-    .join('/');
+  return relativePath.split('/').filter(Boolean).map(encodeURIComponent).join('/');
 };
 
 const normalizePath = (relativePath = '') => {
@@ -236,23 +232,26 @@ const getPreviewUrl = (relativePath) => {
 
 const fetchAuthStatus = () => requestJson('/api/auth/status', { method: 'GET' });
 
-const setupAccount = ({ username, password }) => requestJson('/api/auth/setup', {
-  method: 'POST',
-  body: JSON.stringify({ username, password }),
-});
+const setupAccount = ({ username, password }) =>
+  requestJson('/api/auth/setup', {
+    method: 'POST',
+    body: JSON.stringify({ username, password }),
+  });
 
-const login = ({ username, password }) => requestJson('/api/auth/login', {
-  method: 'POST',
-  body: JSON.stringify({ username, password }),
-});
+const login = ({ username, password }) =>
+  requestJson('/api/auth/login', {
+    method: 'POST',
+    body: JSON.stringify({ username, password }),
+  });
 
 const fetchCurrentUser = () => requestJson('/api/auth/me', { method: 'GET' });
 
 // Token minting removed: cookie-based session only
 
-const logout = () => requestJson('/api/auth/logout', {
-  method: 'POST',
-});
+const logout = () =>
+  requestJson('/api/auth/logout', {
+    method: 'POST',
+  });
 
 export {
   apiBase,
@@ -293,14 +292,7 @@ async function patchSettings(partial) {
   });
 }
 
-export {
-  getSettings,
-  patchSettings,
-  setupAccount,
-  login,
-  logout,
-  fetchCurrentUser,
-};
+export { getSettings, patchSettings, setupAccount, login, logout, fetchCurrentUser };
 
 // Admin Users API
 async function fetchUsers() {
@@ -318,7 +310,11 @@ async function updateUserRoles(userId, roles) {
 async function createUser({ username, password, roles = [] }) {
   return requestJson('/api/users', {
     method: 'POST',
-    body: JSON.stringify({ username, password, roles: Array.isArray(roles) ? roles : [] }),
+    body: JSON.stringify({
+      username,
+      password,
+      roles: Array.isArray(roles) ? roles : [],
+    }),
   });
 }
 
@@ -364,15 +360,11 @@ async function fetchOnlyOfficeConfig(path, mode = 'edit') {
   });
 }
 
-export {
-  fetchOnlyOfficeConfig,
-};
+export { fetchOnlyOfficeConfig };
 
 // Features
 async function fetchFeatures() {
   return requestJson('/api/features', { method: 'GET' });
 }
 
-export {
-  fetchFeatures,
-};
+export { fetchFeatures };

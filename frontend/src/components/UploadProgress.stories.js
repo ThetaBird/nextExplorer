@@ -1,17 +1,17 @@
-import UploadProgress from './UploadProgress.vue'
-import { useUppyStore } from '@/stores/uppyStore'
+import UploadProgress from './UploadProgress.vue';
+import { useUppyStore } from '@/stores/uppyStore';
 
 function noop() {}
 
 function seedUppyStore(state) {
-  const store = useUppyStore()
-  store.$reset()
+  const store = useUppyStore();
+  store.$reset();
   store.uppy = {
     resumeAll: noop,
     pauseAll: noop,
     cancelAll: noop,
-  }
-  store.setState(state)
+  };
+  store.setState(state);
 }
 
 function makeDemoState({ now = Date.now(), totalProgress = 42, allComplete = false } = {}) {
@@ -58,20 +58,20 @@ function makeDemoState({ now = Date.now(), totalProgress = 42, allComplete = fal
         uploadStarted: now - 3_000,
       },
     },
-  }
+  };
 
   return {
     totalProgress,
     currentUploads: allComplete ? {} : { a: true, b: true, c: true },
     files,
-  }
+  };
 }
 
 export default {
   title: 'Components/UploadProgress',
   component: UploadProgress,
   parameters: { layout: 'fullscreen' },
-}
+};
 
 export const Default = {
   args: {
@@ -80,12 +80,12 @@ export const Default = {
   render: (args) => ({
     components: { UploadProgress },
     setup() {
-      seedUppyStore(makeDemoState({ totalProgress: 42 }))
-      return { args }
+      seedUppyStore(makeDemoState({ totalProgress: 42 }));
+      return { args };
     },
     template: '<UploadProgress v-bind="args" />',
   }),
-}
+};
 
 export const DetailsOpen = {
   args: {
@@ -95,12 +95,12 @@ export const DetailsOpen = {
   render: (args) => ({
     components: { UploadProgress },
     setup() {
-      seedUppyStore(makeDemoState({ totalProgress: 58 }))
-      return { args }
+      seedUppyStore(makeDemoState({ totalProgress: 58 }));
+      return { args };
     },
     template: '<UploadProgress v-bind="args" />',
   }),
-}
+};
 
 export const Paused = {
   args: {
@@ -110,12 +110,12 @@ export const Paused = {
   render: (args) => ({
     components: { UploadProgress },
     setup() {
-      seedUppyStore(makeDemoState({ totalProgress: 73 }))
-      return { args }
+      seedUppyStore(makeDemoState({ totalProgress: 73 }));
+      return { args };
     },
     template: '<UploadProgress v-bind="args" />',
   }),
-}
+};
 
 export const Completed = {
   args: {
@@ -125,10 +125,9 @@ export const Completed = {
   render: (args) => ({
     components: { UploadProgress },
     setup() {
-      seedUppyStore(makeDemoState({ totalProgress: 100, allComplete: true }))
-      return { args }
+      seedUppyStore(makeDemoState({ totalProgress: 100, allComplete: true }));
+      return { args };
     },
     template: '<UploadProgress v-bind="args" />',
   }),
-}
-
+};

@@ -52,7 +52,10 @@ onMounted(async () => {
 
   if (auth.requiresSetup) {
     const redirect = redirectTarget.value;
-    router.replace({ name: 'auth-setup', ...(redirect ? { query: { redirect } } : {}) });
+    router.replace({
+      name: 'auth-setup',
+      ...(redirect ? { query: { redirect } } : {}),
+    });
     return;
   }
 
@@ -77,9 +80,12 @@ const syncErrorFromRoute = (nextRoute) => {
   const query = nextRoute?.query || {};
   const errorDescription = query.error_description;
   const error = query.error;
-  const message = typeof errorDescription === 'string' && errorDescription.trim()
-    ? errorDescription.trim()
-    : (typeof error === 'string' && error.trim() ? error.trim() : '');
+  const message =
+    typeof errorDescription === 'string' && errorDescription.trim()
+      ? errorDescription.trim()
+      : typeof error === 'string' && error.trim()
+        ? error.trim()
+        : '';
 
   if (message && !loginError.value) {
     loginError.value = message;
@@ -139,9 +145,10 @@ const handleOidcLogin = () => {
   const base = apiBase || '';
   // Prefer EOC's native /login route; Vite proxies /login to backend in dev.
   const loginUrl = `${base}/login`;
-  const finalUrl = returnTo && typeof returnTo === 'string'
-    ? `${loginUrl}?returnTo=${encodeURIComponent(returnTo)}`
-    : loginUrl;
+  const finalUrl =
+    returnTo && typeof returnTo === 'string'
+      ? `${loginUrl}?returnTo=${encodeURIComponent(returnTo)}`
+      : loginUrl;
   window.location.href = finalUrl;
 };
 </script>
@@ -195,14 +202,15 @@ const handleOidcLogin = () => {
       </label>
 
       <p v-if="loginError" :class="helperTextClasses">{{ loginError }}</p>
-      <p v-else-if="statusError" :class="helperTextClasses">{{ statusError }}</p>
+      <p v-else-if="statusError" :class="helperTextClasses">
+        {{ statusError }}
+      </p>
 
-      <button type="submit" 
-      class="w-full h-12 px-4 rounded-xl 
-      bg-neutral-100 hover:bg-neutral-100/90 active:bg-neutral-100/70  
-      font-semibold text-neutral-900 
-      disabled:cursor-not-allowed disabled:opacity-60" 
-      :disabled="isSubmittingLogin">
+      <button
+        type="submit"
+        class="w-full h-12 px-4 rounded-xl bg-neutral-100 hover:bg-neutral-100/90 active:bg-neutral-100/70 font-semibold text-neutral-900 disabled:cursor-not-allowed disabled:opacity-60"
+        :disabled="isSubmittingLogin"
+      >
         <span v-if="isSubmittingLogin">{{ $t('common.verifying') }}</span>
         <span v-else class="inline-flex items-center gap-2">
           <LockClosedIcon class="h-5 w-5" />
@@ -219,9 +227,7 @@ const handleOidcLogin = () => {
 
     <div v-if="supportsOidc" class="mb-2">
       <button
-        class="flex h-12 w-full items-center justify-center gap-2 rounded-xl 
-        bg-neutral-700/50 hover:bg-neutral-700/70 active:bg-neutral-700/90 
-        px-4 text-sm font-medium text-white ring-1 ring-inset ring-white/10 "
+        class="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-neutral-700/50 hover:bg-neutral-700/70 active:bg-neutral-700/90 px-4 text-sm font-medium text-white ring-1 ring-inset ring-white/10"
         type="button"
         @click="handleOidcLogin"
       >
@@ -230,11 +236,7 @@ const handleOidcLogin = () => {
       </button>
     </div>
 
-    <p
-      v-if="!supportsLocal && (loginError || statusError)"
-      class="mt-4"
-      :class="helperTextClasses"
-    >
+    <p v-if="!supportsLocal && (loginError || statusError)" class="mt-4" :class="helperTextClasses">
       {{ loginError || statusError }}
     </p>
   </AuthLayout>

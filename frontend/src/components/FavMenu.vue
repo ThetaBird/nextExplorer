@@ -141,7 +141,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div ref="rootEl" >
+  <div ref="rootEl">
     <h4
       class="group flex items-center justify-between py-2 pt-2 text-sm text-neutral-400 dark:text-neutral-500 font-medium"
     >
@@ -149,14 +149,11 @@ onBeforeUnmount(() => {
       <div class="flex items-center gap-1">
         <button
           type="button"
-          class="hidden group-hover:flex items-center justify-center rounded-full
-          border border-zinc-400 dark:border-zinc-500 px-3 text-xs
-           text-neutral-500  dark:text-neutral-400 "
-          
+          class="hidden group-hover:flex items-center justify-center rounded-full border border-zinc-400 dark:border-zinc-500 px-3 text-xs text-neutral-500 dark:text-neutral-400"
           @click.stop="toggleEditMode"
           :disabled="!favorites.length"
         >
-          {{t('common.edit')}}
+          {{ t('common.edit') }}
         </button>
         <button
           @click="open = !open"
@@ -195,12 +192,10 @@ onBeforeUnmount(() => {
               @end="handleReorderEnd"
             >
               <template #item="{ element: favorite }">
-                <div
-                  class="group/item mb-3 flex items-center gap-2 favorite-drag-handle"
-                >
+                <div class="group/item mb-3 flex items-center gap-2 favorite-drag-handle">
                   <Bars3Icon
                     v-if="isEditMode"
-                    class=" h-4 w-4 shrink-0 cursor-grab text-neutral-400 group-hover/item:text-white dark:text-neutral-500 dark:group-hover/item:text-neutral-100 transition-colors duration-150"
+                    class="h-4 w-4 shrink-0 cursor-grab text-neutral-400 group-hover/item:text-white dark:text-neutral-500 dark:group-hover/item:text-neutral-100 transition-colors duration-150"
                   />
                   <button
                     type="button"
@@ -210,7 +205,7 @@ onBeforeUnmount(() => {
                       'cursor-pointer flex w-full items-center gap-3 rounded-lg text-sm',
                       isActiveFav(favorite.path)
                         ? 'text-neutral-950 dark:text-white'
-                        : 'text-neutral-950 dark:text-neutral-300/90'
+                        : 'text-neutral-950 dark:text-neutral-300/90',
                     ]"
                   >
                     <component
@@ -242,7 +237,7 @@ onBeforeUnmount(() => {
           </template>
           <div
             v-else
-            class=" my-2 rounded-lg border-2 border-dashed border-neutral-300 bg-neutral-50 px-4 py-3 text-xs text-neutral-500 dark:border-zinc-700 dark:bg-zinc-900/40 dark:text-neutral-400"
+            class="my-2 rounded-lg border-2 border-dashed border-neutral-300 bg-neutral-50 px-4 py-3 text-xs text-neutral-500 dark:border-zinc-700 dark:bg-zinc-900/40 dark:text-neutral-400"
           >
             <div class="flex items-center gap-2 text-neutral-500 dark:text-neutral-300">
               <StarIconOutline class="h-4 w-4" />

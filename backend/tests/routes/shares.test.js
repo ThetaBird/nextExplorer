@@ -94,9 +94,7 @@ test('user volumes: can create and browse share from assigned volume path', asyn
   assert.equal(create.body.sourceSpace, 'user_volume');
   assert.equal(create.body.sourcePath, `${vol.id}/myfolder`);
 
-  const browse = await request(app)
-    .get(`/api/share/${create.body.shareToken}/browse/`)
-    .expect(200);
+  const browse = await request(app).get(`/api/share/${create.body.shareToken}/browse/`).expect(200);
 
   const names = (browse.body.items || []).map((item) => item.name);
   assert.ok(names.includes('hello.txt'));
@@ -184,18 +182,12 @@ test('share expiry: expired shares cannot be accessed or browsed', async () => {
     .send({ expiresAt: '2000-01-01T00:00:00.000Z' })
     .expect(200);
 
-  const info = await request(app)
-    .get(`/api/share/${shareToken}/info`)
-    .expect(200);
+  const info = await request(app).get(`/api/share/${shareToken}/info`).expect(200);
   assert.equal(info.body.isExpired, true);
 
-  const access = await request(app)
-    .get(`/api/share/${shareToken}/access`)
-    .expect(403);
+  const access = await request(app).get(`/api/share/${shareToken}/access`).expect(403);
   assert.equal(access.body?.error?.message, 'Share has expired');
 
-  const browse = await request(app)
-    .get(`/api/share/${shareToken}/browse/`)
-    .expect(403);
+  const browse = await request(app).get(`/api/share/${shareToken}/browse/`).expect(403);
   assert.equal(browse.body?.error?.message, 'Share has expired');
 });

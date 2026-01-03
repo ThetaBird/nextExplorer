@@ -4,16 +4,16 @@ import { ref, computed, watch } from 'vue';
 const props = defineProps({
   permissions: {
     type: Object,
-    default: null
+    default: null,
   },
   isDirectory: {
     type: Boolean,
-    default: false
+    default: false,
   },
   loading: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 });
 
 const emit = defineEmits(['change-permissions', 'change-owner']);
@@ -42,7 +42,7 @@ const octalToFlags = (octal) => {
   return {
     read: (num & 4) !== 0,
     write: (num & 2) !== 0,
-    execute: (num & 1) !== 0
+    execute: (num & 1) !== 0,
   };
 };
 
@@ -52,31 +52,35 @@ const flagsToOctal = (read, write, execute) => {
 };
 
 // Watch for permissions prop changes
-watch(() => props.permissions, (newPerms) => {
-  if (newPerms && newPerms.mode) {
-    // Convert mode to octal string, then get last 3 digits
-    const mode = newPerms.mode.toString(8); // Convert to octal base
-    const perms = mode.slice(-3);
+watch(
+  () => props.permissions,
+  (newPerms) => {
+    if (newPerms && newPerms.mode) {
+      // Convert mode to octal string, then get last 3 digits
+      const mode = newPerms.mode.toString(8); // Convert to octal base
+      const perms = mode.slice(-3);
 
-    // Store original
-    originalOctal.value = perms;
+      // Store original
+      originalOctal.value = perms;
 
-    const owner = octalToFlags(perms[0]);
-    ownerRead.value = owner.read;
-    ownerWrite.value = owner.write;
-    ownerExecute.value = owner.execute;
+      const owner = octalToFlags(perms[0]);
+      ownerRead.value = owner.read;
+      ownerWrite.value = owner.write;
+      ownerExecute.value = owner.execute;
 
-    const group = octalToFlags(perms[1]);
-    groupRead.value = group.read;
-    groupWrite.value = group.write;
-    groupExecute.value = group.execute;
+      const group = octalToFlags(perms[1]);
+      groupRead.value = group.read;
+      groupWrite.value = group.write;
+      groupExecute.value = group.execute;
 
-    const others = octalToFlags(perms[2]);
-    othersRead.value = others.read;
-    othersWrite.value = others.write;
-    othersExecute.value = others.execute;
-  }
-}, { immediate: true });
+      const others = octalToFlags(perms[2]);
+      othersRead.value = others.read;
+      othersWrite.value = others.write;
+      othersExecute.value = others.execute;
+    }
+  },
+  { immediate: true }
+);
 
 const currentOctal = computed(() => {
   const owner = flagsToOctal(ownerRead.value, ownerWrite.value, ownerExecute.value);
@@ -92,7 +96,7 @@ const hasChanges = computed(() => {
 const applyChanges = () => {
   emit('change-permissions', {
     mode: currentOctal.value,
-    recursive: applyToItems.value
+    recursive: applyToItems.value,
   });
 };
 
@@ -229,7 +233,9 @@ const cancelEditGroup = () => {
       <!-- Permissions Grid -->
       <div class="space-y-2">
         <!-- Header Row -->
-        <div class="grid grid-cols-4 gap-2 text-xs font-medium text-neutral-500 dark:text-neutral-400 pb-1 border-b border-neutral-200 dark:border-white/5">
+        <div
+          class="grid grid-cols-4 gap-2 text-xs font-medium text-neutral-500 dark:text-neutral-400 pb-1 border-b border-neutral-200 dark:border-white/5"
+        >
           <div></div>
           <div class="text-center">Read</div>
           <div class="text-center">Write</div>
@@ -238,9 +244,7 @@ const cancelEditGroup = () => {
 
         <!-- Owner Row -->
         <div class="grid grid-cols-4 gap-2 items-center py-1">
-          <div class="text-sm text-neutral-700 dark:text-neutral-300 truncate">
-            Owner
-          </div>
+          <div class="text-sm text-neutral-700 dark:text-neutral-300 truncate">Owner</div>
           <div class="flex justify-center">
             <input
               v-model="ownerRead"
@@ -266,9 +270,7 @@ const cancelEditGroup = () => {
 
         <!-- Group Row -->
         <div class="grid grid-cols-4 gap-2 items-center py-1">
-          <div class="text-sm text-neutral-700 dark:text-neutral-300 truncate">
-            Group
-          </div>
+          <div class="text-sm text-neutral-700 dark:text-neutral-300 truncate">Group</div>
           <div class="flex justify-center">
             <input
               v-model="groupRead"
@@ -320,7 +322,10 @@ const cancelEditGroup = () => {
       </div>
 
       <!-- Apply to items checkbox for directories -->
-      <div v-if="isDirectory" class="flex items-center gap-2 pt-3 border-t border-neutral-200 dark:border-white/5">
+      <div
+        v-if="isDirectory"
+        class="flex items-center gap-2 pt-3 border-t border-neutral-200 dark:border-white/5"
+      >
         <input
           id="apply-to-items"
           v-model="applyToItems"
