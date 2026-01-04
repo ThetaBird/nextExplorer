@@ -4,7 +4,6 @@ import {
   getSettings as getSettingsApi,
   patchSettings as patchSettingsApi,
 } from '@/api';
-import { isPreviewableVideo } from '@/config/media';
 
 export const useAppSettings = defineStore('appSettings', () => {
   const loaded = ref(false);
