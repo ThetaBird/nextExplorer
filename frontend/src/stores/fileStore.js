@@ -14,6 +14,7 @@ import {
 } from '@/api';
 import { useSettingsStore } from '@/stores/settings';
 import { useAppSettings } from '@/stores/appSettings';
+import { isPreviewableVideo } from '@/config/media';
 
 export const useFileStore = defineStore('fileStore', () => {
   // State
@@ -237,6 +238,14 @@ export const useFileStore = defineStore('fileStore', () => {
     return itemKey(item) === renameState.value.key;
   };
 
+  const clearVideoThumbnails = () => {
+    for (const item of currentPathItems.value) {
+      if (item && isPreviewableVideo(item.kind)) {
+        item.thumbnail = null;
+      }
+    }
+  };
+
   const ensureItemThumbnail = async (item) => {
     if (!item || !item.name) {
       return null;
@@ -444,5 +453,6 @@ export const useFileStore = defineStore('fileStore', () => {
     applyRename,
     isItemBeingRenamed,
     ensureItemThumbnail,
+    clearVideoThumbnails,
   };
 });

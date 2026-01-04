@@ -4,6 +4,7 @@ import {
   getSettings as getSettingsApi,
   patchSettings as patchSettingsApi,
 } from '@/api';
+import { isPreviewableVideo } from '@/config/media';
 
 export const useAppSettings = defineStore('appSettings', () => {
   const loaded = ref(false);
@@ -18,6 +19,8 @@ export const useAppSettings = defineStore('appSettings', () => {
     },
     access: { rules: [] },
   });
+  
+  const previousShowVideoCoverArt = ref(state.value.thumbnails.showVideoCoverArt);
 
   const load = async () => {
     loading.value = true;
@@ -36,6 +39,7 @@ export const useAppSettings = defineStore('appSettings', () => {
           rules: Array.isArray(s?.access?.rules) ? s.access.rules : [],
         },
       };
+      previousShowVideoCoverArt.value = state.value.thumbnails.showVideoCoverArt;
       loaded.value = true;
     } catch (e) {
       lastError.value = e?.message || 'Failed to load settings';
@@ -62,6 +66,16 @@ export const useAppSettings = defineStore('appSettings', () => {
       },
     };
     loaded.value = true;
+    
+    const newShowVideoCoverArt = state.value.thumbnails.showVideoCoverArt;
+    if (previousShowVideoCoverArt.value !== newShowVideoCoverArt) {
+      previousShowVideoCoverArt.value = newShowVideoCoverArt;
+      // Dynamic import to avoid circular dependency (fileStore imports appSettings)
+      const { useFileStore } = await import('./fileStore');
+      const fileStore = useFileStore();
+      fileStore.clearVideoThumbnails();
+    }
+    
     return state.value;
   };
 
